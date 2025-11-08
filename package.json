@@ -4,11 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "next dev --webpack",
-    "build": "prisma generate && next build --webpack",
+    "build": "npx prisma generate --no-engine && next build --webpack",
     "start": "next start",
     "lint": "eslint",
     "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev"
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:reset": "prisma migrate reset --force --skip-seed"
   },
   "dependencies": {
     "@livekit/components-react": "^2.9.15",
