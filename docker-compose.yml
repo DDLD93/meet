@@ -1,0 +1,38 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: meet
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - db
+    ports:
+      - '3000:3000'
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/meet
+      APP_BASE_URL: ${APP_BASE_URL:-http://localhost:3000}
+      LIVEKIT_URL: ${LIVEKIT_URL:-}
+      LIVEKIT_API_KEY: ${LIVEKIT_API_KEY:-}
+      LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET:-}
+    command: npm run start
+
+volumes:
+  postgres-data:
+
