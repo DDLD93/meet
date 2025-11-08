@@ -49,7 +49,7 @@ export async function GET(request: Request) {
 
   if (limitParam) {
     const parsedLimit = limitSchema.safeParse(limitParam);
-    if (!parsedLimit.success) {
+    if (!parsedLimit.success || parsedLimit.data === undefined) {
       return NextResponse.json(
         { error: 'limit must be an integer between 1 and 500' },
         { status: 400 },

@@ -176,7 +176,18 @@ export default function JoinClient({
         setLoading(false);
       }
     },
-    [disabled, email, meetingId, meetingTitle, name, password, roomName, searchParams],
+    [
+      disabled,
+      email,
+      isPublic,
+      meetingId,
+      meetingStatus,
+      meetingTitle,
+      name,
+      password,
+      roomName,
+      searchParams,
+    ],
   );
 
   if (session) {

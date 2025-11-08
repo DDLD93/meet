@@ -2,7 +2,7 @@ import {
   AccessToken,
   AccessTokenOptions,
   Room,
-  RoomCreateOptions,
+  CreateOptions,
   RoomServiceClient,
 } from 'livekit-server-sdk';
 
@@ -40,7 +40,7 @@ export const getRoomServiceClient = () => {
 
 export const createRoom = async (
   roomName: string,
-  options?: RoomCreateOptions,
+  options?: CreateOptions,
 ): Promise<Room> => {
   const roomService = getRoomServiceClient();
   try {
@@ -50,7 +50,11 @@ export const createRoom = async (
     });
   } catch (error) {
     if (error instanceof Error && /already exists/i.test(error.message)) {
-      return roomService.getRoom(roomName);
+      const rooms = await roomService.listRooms([roomName]);
+      const existingRoom = rooms.find((room) => room.name === roomName);
+      if (existingRoom) {
+        return existingRoom;
+      }
     }
     throw error;
   }
@@ -58,7 +62,7 @@ export const createRoom = async (
 
 export const ensureRoomExists = async (
   roomName: string,
-  options?: RoomCreateOptions,
+  options?: CreateOptions,
 ) => createRoom(roomName, options);
 
 export const deleteRoom = async (roomName: string) => {
