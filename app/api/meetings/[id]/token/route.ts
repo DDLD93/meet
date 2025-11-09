@@ -88,7 +88,7 @@ export async function POST(request: Request, { params }: RouteContext) {
     const identity = email ?? `guest-${randomUUID()}`;
     const displayName = name?.trim() || email || 'Guest';
 
-    const token = createLiveKitToken({
+    const token = await createLiveKitToken({
       identity,
       name: displayName,
       roomName: meeting.roomName,
