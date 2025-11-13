@@ -9,6 +9,7 @@ import {
   generateMeetingPassword,
   generateRoomName,
   hashPassword,
+  resolveRequestBaseUrl,
 } from '@/lib/meetings';
 
 const DEFAULT_MEETING_DURATION_MINUTES = 60;
@@ -38,7 +39,9 @@ export async function POST(request: Request) {
     const endTime = calculateEndTime(startTime);
     const roomName = generateRoomName(title);
     const password = generateMeetingPassword();
-    const joinUrl = buildJoinUrl(roomName, password);
+    const joinUrl = buildJoinUrl(roomName, password, {
+      baseUrl: resolveRequestBaseUrl(request),
+    });
     const passwordHash = await hashPassword(password);
 
     const meeting = await prisma.meeting.create({

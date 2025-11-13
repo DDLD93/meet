@@ -8,6 +8,7 @@ import {
   createMeetingSchema,
   generateRoomName,
   hashPassword,
+  resolveRequestBaseUrl,
 } from '@/lib/meetings';
 
 const serializeMeeting = (
@@ -98,7 +99,9 @@ export async function POST(request: Request) {
       parsed.data;
 
     const roomName = generateRoomName(title);
-    const joinUrl = buildJoinUrl(roomName, password);
+    const joinUrl = buildJoinUrl(roomName, password, {
+      baseUrl: resolveRequestBaseUrl(request),
+    });
     const passwordHash = await hashPassword(password);
 
     const meeting = await prisma.meeting.create({

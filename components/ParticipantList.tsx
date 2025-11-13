@@ -13,7 +13,11 @@ const participantMicrophoneStatus = (participant: Participant) =>
 const participantCameraStatus = (participant: Participant) =>
   participant.isCameraEnabled ? 'Camera on' : 'Camera off';
 
-export function ParticipantList() {
+type ParticipantListProps = {
+  className?: string;
+};
+
+export function ParticipantList({ className }: ParticipantListProps) {
   const remoteParticipants = useParticipants();
   const { localParticipant } = useLocalParticipant();
 
@@ -26,7 +30,11 @@ export function ParticipantList() {
   }, [localParticipant, remoteParticipants]);
 
   return (
-    <section className="flex min-h-0 flex-1 flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 shadow-inner">
+    <section
+      className={`flex min-h-0 flex-1 flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 shadow-inner ${
+        className ?? ''
+      }`}
+    >
       <header className="flex items-center justify-between">
         <h2 className="text-sm font-semibold text-white/90 tracking-wide">
           Participants

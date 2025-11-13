@@ -11,6 +11,31 @@ const DEFAULT_PASSWORD_LENGTH = 6;
 const getAppBaseUrl = () =>
   process.env.APP_BASE_URL?.replace(/\/+$/, '') ?? 'http://localhost:3000';
 
+export const resolveRequestBaseUrl = (request?: Request) => {
+  if (!request) {
+    return null;
+  }
+
+  try {
+    const forwardedProto = request.headers.get('x-forwarded-proto');
+    const forwardedHost = request.headers.get('x-forwarded-host');
+    if (forwardedProto && forwardedHost) {
+      return `${forwardedProto}://${forwardedHost}`.replace(/\/+$/, '');
+    }
+
+    const host = request.headers.get('host');
+    if (host) {
+      const protocol = forwardedProto ?? (host.includes('localhost') ? 'http' : 'https');
+      return `${protocol}://${host}`.replace(/\/+$/, '');
+    }
+
+    const { origin } = new URL(request.url);
+    return origin.replace(/\/+$/, '');
+  } catch {
+    return null;
+  }
+};
+
 const slugify = (value: string) => {
   return value
     .toLowerCase()
@@ -38,8 +63,12 @@ export const generateMeetingPassword = (length = DEFAULT_PASSWORD_LENGTH) => {
   return chars.slice(0, length);
 };
 
-export const buildJoinUrl = (roomName: string, password: string) => {
-  const baseUrl = getAppBaseUrl();
+export const buildJoinUrl = (
+  roomName: string,
+  password: string,
+  options?: { baseUrl?: string | null },
+) => {
+  const baseUrl = options?.baseUrl?.replace(/\/+$/, '') ?? getAppBaseUrl();
   const searchParams = new URLSearchParams({ password });
   return `${baseUrl}/join/${roomName}?${searchParams.toString()}`;
 };
