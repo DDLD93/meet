@@ -77,9 +77,16 @@ export default function MeetingRoomPage() {
 
   if (!roomName) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[var(--color-background)] px-4 sm:px-6 py-8 sm:py-12">
-        <div className="rounded-lg border border-error/40 bg-error/10 px-4 py-3 text-sm text-error">
-          Missing room identifier.
+      <main className="relative min-h-screen bg-black">
+        <nav className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-8 py-6">
+          <div className="text-xl font-bold text-white">
+            VINI <span className="text-red-500">MEET</span>
+          </div>
+        </nav>
+        <div className="flex min-h-screen items-center justify-center px-4 sm:px-6 py-8 sm:py-12">
+          <div className="rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+            Missing room identifier.
+          </div>
         </div>
       </main>
     );
@@ -87,9 +94,16 @@ export default function MeetingRoomPage() {
 
   if (loading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[var(--color-background)] px-4 sm:px-6 py-8 sm:py-12">
-        <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm text-[var(--color-text-muted)]">
-          Connecting you to the meeting…
+      <main className="relative min-h-screen bg-black">
+        <nav className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-8 py-6">
+          <div className="text-xl font-bold text-white">
+            VINI <span className="text-red-500">MEET</span>
+          </div>
+        </nav>
+        <div className="flex min-h-screen items-center justify-center px-4 sm:px-6 py-8 sm:py-12">
+          <div className="rounded-lg border border-zinc-800 bg-zinc-900/50 px-4 py-3 text-sm text-gray-400">
+            Connecting you to the meeting…
+          </div>
         </div>
       </main>
     );
@@ -115,57 +129,79 @@ export default function MeetingRoomPage() {
     };
 
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-[var(--color-background)] px-4 sm:px-6 py-8 sm:py-12 text-center">
-        <div className="max-w-sm rounded-lg border border-warning/40 bg-warning/10 px-4 sm:px-5 py-3 sm:py-4 text-sm text-warning">
-          We couldn&apos;t find an active meeting session. {credentials ? 'You can rejoin using your saved credentials.' : 'Please re-enter the meeting details.'}
+      <main className="relative min-h-screen bg-black">
+        <nav className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-8 py-6">
+          <div className="text-xl font-bold text-white">
+            VINI <span className="text-red-500">MEET</span>
+          </div>
+        </nav>
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-gradient-to-br from-black via-zinc-950 to-black" />
+          <div className="absolute top-0 right-0 h-[500px] w-[500px] bg-red-600/10 blur-[120px] rounded-full" />
         </div>
-        <button
-          type="button"
-          onClick={redirectToLobby}
-          className="rounded-lg border border-primary/50 bg-primary/10 px-4 py-2 text-sm font-semibold text-primary transition-all duration-200 hover:bg-primary/20 hover:border-primary/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/80"
-        >
-          {credentials ? 'Rejoin meeting' : 'Go back to join page'}
-        </button>
+        <div className="relative z-10 flex min-h-screen flex-col items-center justify-center gap-4 px-4 sm:px-6 py-8 sm:py-12 text-center">
+          <div className="max-w-sm rounded-lg border border-red-500/40 bg-red-500/10 px-4 sm:px-5 py-3 sm:py-4 text-sm text-red-400">
+            We couldn&apos;t find an active meeting session. {credentials ? 'You can rejoin using your saved credentials.' : 'Please re-enter the meeting details.'}
+          </div>
+          <button
+            type="button"
+            onClick={redirectToLobby}
+            className="rounded-2xl bg-red-600 px-6 py-3 text-sm font-semibold text-white transition-all duration-200 hover:bg-red-500 hover:shadow-[0_20px_40px_rgba(239,68,68,0.3)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/80"
+          >
+            {credentials ? 'Rejoin meeting' : 'Go back to join page'}
+          </button>
+        </div>
       </main>
     );
   }
 
   if (error) {
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-[var(--color-background)] px-4 sm:px-6 py-8 sm:py-12 text-center">
-        <div className="max-w-sm rounded-lg border border-error/40 bg-error/10 px-4 sm:px-5 py-3 sm:py-4 text-sm text-error">
-          {error}
+      <main className="relative min-h-screen bg-black">
+        <nav className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-8 py-6">
+          <div className="text-xl font-bold text-white">
+            VINI <span className="text-red-500">MEET</span>
+          </div>
+        </nav>
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-gradient-to-br from-black via-zinc-950 to-black" />
+          <div className="absolute top-0 right-0 h-[500px] w-[500px] bg-red-600/10 blur-[120px] rounded-full" />
         </div>
-        <div className="flex flex-wrap items-center justify-center gap-3">
-          <button
-            type="button"
-            onClick={() => refresh(true)}
-            className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2 text-sm font-semibold text-[var(--color-text-primary)] transition-all duration-200 hover:bg-[var(--color-surface)]-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/80"
-          >
-            Try again
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              const credentials = meetingId ? loadStoredCredentials(meetingId) : null;
-              if (credentials) {
-                const params = new URLSearchParams();
-                if (credentials.email) {
-                  params.set('email', credentials.email);
+        <div className="relative z-10 flex min-h-screen flex-col items-center justify-center gap-4 px-4 sm:px-6 py-8 sm:py-12 text-center">
+          <div className="max-w-sm rounded-lg border border-red-500/40 bg-red-500/10 px-4 sm:px-5 py-3 sm:py-4 text-sm text-red-400">
+            {error}
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <button
+              type="button"
+              onClick={() => refresh(true)}
+              className="rounded-2xl border border-zinc-800 bg-zinc-900/50 px-4 py-2 text-sm font-semibold text-white transition-all duration-200 hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/80"
+            >
+              Try again
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                const credentials = meetingId ? loadStoredCredentials(meetingId) : null;
+                if (credentials) {
+                  const params = new URLSearchParams();
+                  if (credentials.email) {
+                    params.set('email', credentials.email);
+                  }
+                  if (credentials.name) {
+                    params.set('name', credentials.name);
+                  }
+                  const query = params.toString();
+                  router.replace(`/join/${encodeURIComponent(roomName)}${query ? `?${query}` : ''}`);
+                } else {
+                  router.replace(`/join/${encodeURIComponent(roomName)}`);
                 }
-                if (credentials.name) {
-                  params.set('name', credentials.name);
-                }
-                const query = params.toString();
-                router.replace(`/join/${encodeURIComponent(roomName)}${query ? `?${query}` : ''}`);
-              } else {
-                router.replace(`/join/${encodeURIComponent(roomName)}`);
-              }
-            }}
-            className="rounded-lg border border-primary/50 bg-primary/10 px-4 py-2 text-sm font-semibold text-primary transition-all duration-200 hover:bg-primary/20 hover:border-primary/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/80"
-          >
-            Return to join
-          </button>
+              }}
+              className="rounded-2xl bg-red-600 px-4 py-2 text-sm font-semibold text-white transition-all duration-200 hover:bg-red-500 hover:shadow-[0_20px_40px_rgba(239,68,68,0.3)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/80"
+            >
+              Return to join
+            </button>
+          </div>
         </div>
       </main>
     );

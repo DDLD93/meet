@@ -97,17 +97,31 @@ export default function JoinPage() {
 
   if (loading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[var(--color-background)] px-4 sm:px-6 py-8 sm:py-12">
-        <p className="text-sm text-[var(--color-text-muted)]">Loading meeting…</p>
+      <main className="relative min-h-screen bg-black">
+        <nav className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-8 py-6">
+          <div className="text-xl font-bold text-white">
+            VINI <span className="text-red-500">MEET</span>
+          </div>
+        </nav>
+        <div className="flex min-h-screen items-center justify-center px-4 sm:px-6 py-8 sm:py-12">
+          <p className="text-sm text-gray-400">Loading meeting…</p>
+        </div>
       </main>
     );
   }
 
   if (error) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[var(--color-background)] px-4 sm:px-6 py-8 sm:py-12">
-        <div className="rounded-lg border border-error/40 bg-error/10 px-4 py-3 text-sm text-error">
-          {error}
+      <main className="relative min-h-screen bg-black">
+        <nav className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-8 py-6">
+          <div className="text-xl font-bold text-white">
+            VINI <span className="text-red-500">MEET</span>
+          </div>
+        </nav>
+        <div className="flex min-h-screen items-center justify-center px-4 sm:px-6 py-8 sm:py-12">
+          <div className="rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+            {error}
+          </div>
         </div>
       </main>
     );
@@ -115,9 +129,16 @@ export default function JoinPage() {
 
   if (notFound || !meeting) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[var(--color-background)] px-4 sm:px-6 py-8 sm:py-12">
-        <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm text-[var(--color-text-primary)]">
-          Meeting not found or is no longer available.
+      <main className="relative min-h-screen bg-black">
+        <nav className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-8 py-6">
+          <div className="text-xl font-bold text-white">
+            VINI <span className="text-red-500">MEET</span>
+          </div>
+        </nav>
+        <div className="flex min-h-screen items-center justify-center px-4 sm:px-6 py-8 sm:py-12">
+          <div className="rounded-lg border border-zinc-800 bg-zinc-900/50 px-4 py-3 text-sm text-white">
+            Meeting not found or is no longer available.
+          </div>
         </div>
       </main>
     );

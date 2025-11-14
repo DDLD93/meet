@@ -6,17 +6,17 @@ import { Toaster } from 'react-hot-toast';
 
 export const metadata: Metadata = {
   title: {
-    default: 'vini meet | Vinicius International Video Conference',
-    template: '%s | vini meet',
+    default: 'Vini Meet | Vinicius International Video Conference',
+    template: '%s | Vini Meet',
   },
   description:
-    'vini meet - Vinicius International Video Conference. Professional video conferencing solution for seamless remote collaboration.',
+    'Vini Meet - Vinicius International Video Conference. Professional video conferencing solution for seamless remote collaboration.',
   twitter: {
     card: 'summary_large_image',
   },
   openGraph: {
     url: 'https://vini.meet',
-    siteName: 'vini meet',
+    siteName: 'Vini Meet',
     type: 'website',
   },
   icons: {
