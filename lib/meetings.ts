@@ -4,9 +4,8 @@ import { z } from 'zod';
 
 export const PASSWORD_SALT_ROUNDS = 10;
 
-const SLUG_MAX_LENGTH = 48;
-const DEFAULT_ROOM_PREFIX = 'meeting';
-const DEFAULT_PASSWORD_LENGTH = 6;
+const ROOM_NAME_LENGTH = 8;
+const ALPHANUMERIC_CHARS = 'abcdefghijklmnopqrstuvwxyz0123456789';
 
 const getAppBaseUrl = () =>
   process.env.APP_BASE_URL?.replace(/\/+$/, '') ?? 'http://localhost:3000';
@@ -36,26 +35,42 @@ export const resolveRequestBaseUrl = (request?: Request) => {
   }
 };
 
-const slugify = (value: string) => {
-  return value
-    .toLowerCase()
-    .normalize('NFKD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, SLUG_MAX_LENGTH);
+const generateRandomRoomName = (): string => {
+  const bytes = crypto.randomBytes(ROOM_NAME_LENGTH);
+  let result = '';
+  for (let i = 0; i < ROOM_NAME_LENGTH; i++) {
+    result += ALPHANUMERIC_CHARS[bytes[i] % ALPHANUMERIC_CHARS.length];
+  }
+  return result;
 };
-
-const randomIdentifier = (size = 4) =>
-  crypto.randomBytes(size).toString('hex');
 
 export const normalizeEmail = (email: string) =>
   email.trim().toLowerCase();
 
-export const generateRoomName = (title?: string) => {
-  const slug = title ? slugify(title) : DEFAULT_ROOM_PREFIX;
-  const identifier = randomIdentifier();
-  return `${slug || DEFAULT_ROOM_PREFIX}-${identifier}`;
+export const generateRoomName = async (checkUnique?: (name: string) => Promise<boolean>): Promise<string> => {
+  let attempts = 0;
+  const maxAttempts = 10;
+  
+  while (attempts < maxAttempts) {
+    const roomName = generateRandomRoomName();
+    
+    // If no uniqueness check provided, return immediately
+    if (!checkUnique) {
+      return roomName;
+    }
+    
+    // Check if room name is unique
+    const isUnique = await checkUnique(roomName);
+    if (isUnique) {
+      return roomName;
+    }
+    
+    attempts++;
+  }
+  
+  // Fallback: if all attempts failed, return a random one anyway
+  // (collision is very unlikely with 8 chars = 2.8 trillion combinations)
+  return generateRandomRoomName();
 };
 
 export const generateMeetingPassword = (length = DEFAULT_PASSWORD_LENGTH) => {
@@ -65,12 +80,10 @@ export const generateMeetingPassword = (length = DEFAULT_PASSWORD_LENGTH) => {
 
 export const buildJoinUrl = (
   roomName: string,
-  password: string,
   options?: { baseUrl?: string | null },
 ) => {
   const baseUrl = options?.baseUrl?.replace(/\/+$/, '') ?? getAppBaseUrl();
-  const searchParams = new URLSearchParams({ password });
-  return `${baseUrl}/join/${roomName}?${searchParams.toString()}`;
+  return `${baseUrl}/join/${roomName}`;
 };
 
 export const hashPassword = async (password: string) => {
@@ -82,61 +95,38 @@ export const verifyPassword = async (
   hash: string,
 ) => bcrypt.compare(password, hash);
 
-export const participantEmailsSchema = z
-  .array(z.string().email())
-  .transform((emails) => [
-    ...new Set(emails.map((email) => normalizeEmail(email))),
-  ]);
+export const participantSchema = z.object({
+  email: z.string().email(),
+  name: z.string().min(1).max(120),
+});
 
-export const buildParticipantCreateData = (emails: string[]) =>
-  emails.map((email) => ({ email: normalizeEmail(email) }));
-
-export const createMeetingSchema = z
-  .object({
-    title: z.string().min(1, 'Title is required').max(120),
-    description: z.string().max(1024).optional(),
-    startTime: z.coerce.date({ invalid_type_error: 'startTime is required' }),
-    endTime: z.coerce.date({ invalid_type_error: 'endTime is required' }),
-    isPublic: z.boolean().default(false),
-    password: z.string().min(6, 'Password must be at least 6 characters'),
-    participants: participantEmailsSchema.optional(),
-  })
-  .superRefine((data, ctx) => {
-    if (data.endTime <= data.startTime) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['endTime'],
-        message: 'endTime must be after startTime',
-      });
-    }
-
-    if (!data.isPublic && (!data.participants || data.participants.length === 0)) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['participants'],
-        message: 'Private meetings require at least one participant email',
-      });
-    }
+export const participantsSchema = z
+  .array(participantSchema)
+  .transform((participants) => {
+    const seen = new Set<string>();
+    return participants.filter((p) => {
+      const normalizedEmail = normalizeEmail(p.email);
+      if (seen.has(normalizedEmail)) {
+        return false;
+      }
+      seen.add(normalizedEmail);
+      return true;
+    });
   });
 
-export const createInstantMeetingSchema = z
-  .object({
-    title: z.string().min(1, 'Title is required').max(120),
-    description: z.string().max(1024).optional(),
-    isPublic: z.boolean().default(false),
-    participants: participantEmailsSchema.optional(),
-  })
-  .superRefine((data, ctx) => {
-    if (!data.isPublic && (!data.participants || data.participants.length === 0)) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['participants'],
-        message: 'Private meetings require at least one participant email',
-      });
-    }
-  });
+export const buildParticipantCreateData = (
+  participants: Array<{ email: string; name: string }>,
+) =>
+  participants.map((p) => ({
+    email: normalizeEmail(p.email),
+    name: p.name.trim(),
+  }));
 
-export type CreateMeetingInput = z.infer<typeof createMeetingSchema>;
+export const createInstantMeetingSchema = z.object({
+  title: z.string().min(1, 'Title is required').max(120),
+  participants: participantsSchema.optional(),
+});
+
 export type CreateInstantMeetingInput = z.infer<
   typeof createInstantMeetingSchema
 >;

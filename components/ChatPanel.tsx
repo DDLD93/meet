@@ -283,7 +283,7 @@ export function ChatPanel({
   if (!room) {
     return (
       <div className={className}>
-        <div className="flex h-full items-center justify-center text-sm text-slate-500">
+        <div className="flex h-full items-center justify-center text-sm text-[var(--color-text-muted)]">
           Chat is unavailable outside of a LiveKit room.
         </div>
       </div>
@@ -292,14 +292,14 @@ export function ChatPanel({
 
   return (
     <section
-      className={`flex min-h-0 flex-1 flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 shadow-inner ${
+      className={`flex min-h-0 flex-1 flex-col gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-md p-3 sm:p-4 ${
         className ?? ''
       }`}
     >
       <header className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-white/90 tracking-wide">Live chat</h2>
+        <h2 className="text-sm font-semibold text-[var(--color-text-primary)] tracking-wide">Live chat</h2>
         {loadingHistory && (
-          <span className="text-xs text-white/50">Loading…</span>
+          <span className="text-xs text-[var(--color-text-muted)]">Loading…</span>
         )}
       </header>
       <div
@@ -307,7 +307,7 @@ export function ChatPanel({
         className="flex-1 min-h-0 space-y-3 overflow-y-auto pr-1 text-sm"
       >
         {messages.length === 0 && !loadingHistory ? (
-          <div className="rounded-lg border border-dashed border-white/10 bg-black/30 px-4 py-6 text-center text-xs text-white/60">
+          <div className="rounded-lg border border-dashed border-[var(--color-border)] bg-[var(--color-background-alt)] px-4 py-6 text-center text-xs text-[var(--color-text-muted)]">
             No messages yet. Start the conversation!
           </div>
         ) : (
@@ -320,20 +320,20 @@ export function ChatPanel({
                 className={`flex ${local ? 'justify-end' : 'justify-start'}`}
               >
                 <article
-                  className={`max-w-xs rounded-2xl px-3 py-2 text-sm shadow-sm ${
+                  className={`max-w-[85%] sm:max-w-xs rounded-2xl px-3 py-2 text-sm shadow-sm ${
                     local
-                      ? 'bg-sky-500/30 text-white'
-                      : 'bg-white/10 text-white/90'
+                      ? 'bg-primary/10 text-[var(--color-text-primary)] border border-primary/20'
+                      : 'bg-[var(--color-background-alt)] text-[var(--color-text-primary)] border border-[var(--color-border)]'
                   }`}
                 >
-                  <div className="text-[11px] font-medium uppercase tracking-wide text-white/70">
+                  <div className="text-[11px] font-medium uppercase tracking-wide text-[var(--color-text-muted)]">
                     {local ? 'You' : message.from.name ?? message.from.identity ?? 'Participant'}
                   </div>
                   <p className="mt-1 whitespace-pre-wrap break-words">
                     {message.content}
                   </p>
                   <time
-                    className="mt-1 block text-right text-[10px] text-white/50"
+                    className="mt-1 block text-right text-[10px] text-[var(--color-text-light)]"
                     dateTime={new Date(message.timestamp).toISOString()}
                   >
                     {formatTimestamp(message.timestamp)}
@@ -346,7 +346,7 @@ export function ChatPanel({
       </div>
       <form
         onSubmit={handleSubmit}
-        className="flex-shrink-0 rounded-xl border border-white/10 bg-black/30 p-3"
+        className="flex-shrink-0 rounded-xl border border-[var(--color-border)] bg-[var(--color-background-alt)] p-2 sm:p-3"
       >
         <div className="flex items-center gap-2">
           <input
@@ -354,13 +354,13 @@ export function ChatPanel({
             value={input}
             onChange={(event) => setInput(event.target.value)}
             placeholder="Type a message…"
-            className="flex-1 rounded-lg border border-white/10 bg-slate-900/60 px-3 py-2 text-sm text-white placeholder:text-white/40 focus-visible:border-sky-400/60"
+            className="flex-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20 outline-none transition-all"
             aria-label="Type a chat message"
           />
           <button
             type="submit"
             disabled={!canSend || sending}
-            className="inline-flex items-center gap-2 rounded-lg border border-sky-400/40 bg-sky-500/20 px-3 py-2 text-sm font-medium text-sky-100 transition-colors duration-200 hover:bg-sky-500/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/80 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/10 disabled:text-white/40"
+            className="inline-flex items-center gap-2 rounded-lg border border-primary/40 bg-primary/10 px-3 py-2 text-sm font-medium text-primary transition-all duration-200 hover:bg-primary/20 hover:border-primary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/80 disabled:cursor-not-allowed disabled:border-[var(--color-border)] disabled:bg-[var(--color-background-alt)] disabled:text-[var(--color-text-muted)]"
           >
             Send
           </button>

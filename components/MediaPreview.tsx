@@ -209,54 +209,54 @@ export default function MediaPreview({ className, onStatusChange }: MediaPreview
 
   return (
     <section
-      className={`flex flex-col gap-3 rounded-2xl border border-white/10 bg-black/30 p-4 shadow-inner backdrop-blur ${
+      className={`flex flex-col gap-3 rounded-xl sm:rounded-2xl border border-[var(--color-border)] bg-[var(--color-background-alt)] p-3 sm:p-4 shadow-md ${
         className ?? ''
       }`}
     >
-      <header className="flex flex-col gap-1 text-white">
-        <h2 className="text-sm font-semibold uppercase tracking-[0.3em] text-white/80">
+      <header className="flex flex-col gap-1.5 text-[var(--color-text-primary)]">
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-[var(--color-text-primary)]">
           Test your setup
         </h2>
-        <p className="text-xs text-white/60">
+        <p className="text-xs text-[var(--color-text-muted)]">
           Verify camera framing and microphone levels before you join the room.
         </p>
       </header>
-      <div className="relative w-full overflow-hidden rounded-xl border border-white/10 bg-black/60">
+      <div className="relative w-full overflow-hidden rounded-lg border border-[var(--color-border)] bg-secondary/5">
         {stream ? (
           <video
             ref={videoRef}
             playsInline
             muted
-            className="h-48 w-full object-cover sm:h-56"
+            className="h-40 w-full object-cover sm:h-48 lg:h-56"
           />
         ) : (
-          <div className="flex h-48 w-full items-center justify-center bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 text-center text-xs text-white/50 sm:h-56">
+          <div className="flex h-40 w-full items-center justify-center bg-[var(--color-background-alt)] text-center text-xs text-[var(--color-text-muted)] sm:h-48 lg:h-56">
             Camera preview will appear here once you start testing.
           </div>
         )}
         {!videoActive && stream && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/70 text-sm font-medium text-white/80">
+          <div className="absolute inset-0 flex items-center justify-center bg-secondary/70 text-sm font-medium text-[var(--color-text-primary)]">
             Camera paused
           </div>
         )}
       </div>
-      <div className="flex flex-col gap-3 rounded-xl border border-white/10 bg-white/5 p-3 text-xs text-white/80">
-        <div className="flex flex-col gap-1">
-          <span className="font-semibold uppercase tracking-widest">Mic level</span>
-          <div className="h-2 rounded-full bg-white/10">
+      <div className="flex flex-col gap-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-3 text-xs text-[var(--color-text-primary)]">
+        <div className="flex flex-col gap-2">
+          <span className="font-semibold uppercase tracking-wider text-[var(--color-text-secondary)]">Mic level</span>
+          <div className="h-2 rounded-full bg-[var(--color-background-alt)]">
             <div
-              className="h-2 rounded-full bg-emerald-400 transition-[width] duration-150"
+              className="h-2 rounded-full bg-primary transition-[width] duration-150"
               style={{ width: `${Math.max(4, audioLevel * 100)}%` }}
             />
           </div>
-          <span className="text-[11px] text-white/60">
+          <span className="text-[11px] text-[var(--color-text-muted)]">
             {audioActive
               ? 'Speak into your microphone to see the meter move.'
               : 'Microphone muted.'}
           </span>
         </div>
         {error && (
-          <div className="rounded-lg border border-red-500/40 bg-red-500/10 p-3 text-[11px] text-red-100">
+          <div className="rounded-lg border border-error/40 bg-error/10 p-3 text-[11px] text-error">
             {error}
           </div>
         )}
@@ -264,7 +264,7 @@ export default function MediaPreview({ className, onStatusChange }: MediaPreview
           <button
             type="button"
             onClick={handleTogglePreview}
-            className="flex-1 rounded-lg border border-sky-500/40 bg-sky-500/20 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-sky-100 transition-colors duration-200 hover:bg-sky-500/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/10 disabled:text-white/40"
+            className="flex-1 rounded-lg border border-primary/40 bg-primary/10 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-primary transition-all duration-200 hover:bg-primary/20 hover:border-primary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/80 disabled:cursor-not-allowed disabled:border-[var(--color-border)] disabled:bg-[var(--color-background-alt)] disabled:text-[var(--color-text-muted)]"
             disabled={loading}
           >
             {stream ? 'Stop Test' : 'Start Test'}
@@ -272,7 +272,7 @@ export default function MediaPreview({ className, onStatusChange }: MediaPreview
           <button
             type="button"
             onClick={handleToggleVideo}
-            className="flex-1 rounded-lg border border-white/10 bg-white/10 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-white transition-colors duration-200 hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 disabled:cursor-not-allowed disabled:border-white/5 disabled:bg-white/5 disabled:text-white/40"
+            className="flex-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-xs font-semibold uppercase tracking-wide text-[var(--color-text-primary)] transition-all duration-200 hover:bg-[var(--color-surface)]-hover hover:border-[var(--color-border)]-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/80 disabled:cursor-not-allowed disabled:border-[var(--color-border)]-light disabled:bg-[var(--color-background-alt)] disabled:text-[var(--color-text-muted)]"
             disabled={loading && !stream}
           >
             {videoActive ? 'Pause Camera' : 'Enable Camera'}
@@ -280,7 +280,7 @@ export default function MediaPreview({ className, onStatusChange }: MediaPreview
           <button
             type="button"
             onClick={handleToggleAudio}
-            className="flex-1 rounded-lg border border-white/10 bg-white/10 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-white transition-colors duration-200 hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 disabled:cursor-not-allowed disabled:border-white/5 disabled:bg-white/5 disabled:text-white/40"
+            className="flex-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-xs font-semibold uppercase tracking-wide text-[var(--color-text-primary)] transition-all duration-200 hover:bg-[var(--color-surface)]-hover hover:border-[var(--color-border)]-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/80 disabled:cursor-not-allowed disabled:border-[var(--color-border)]-light disabled:bg-[var(--color-background-alt)] disabled:text-[var(--color-text-muted)]"
             disabled={loading && !stream}
           >
             {audioActive ? 'Mute Mic' : 'Enable Mic'}

@@ -3,20 +3,10 @@ import { MeetingStatus } from '@prisma/client';
 
 import prisma from '@/lib/prisma';
 import {
-  buildJoinUrl,
   buildParticipantCreateData,
   createInstantMeetingSchema,
-  generateMeetingPassword,
   generateRoomName,
-  hashPassword,
-  resolveRequestBaseUrl,
 } from '@/lib/meetings';
-
-const DEFAULT_MEETING_DURATION_MINUTES = 60;
-
-const calculateEndTime = (start: Date) => {
-  return new Date(start.getTime() + DEFAULT_MEETING_DURATION_MINUTES * 60_000);
-};
 
 export async function POST(request: Request) {
   try {
@@ -33,29 +23,22 @@ export async function POST(request: Request) {
       );
     }
 
-    const { title, description, isPublic, participants } = parsed.data;
+    const { title, participants } = parsed.data;
 
-    const startTime = new Date();
-    const endTime = calculateEndTime(startTime);
-    const roomName = generateRoomName(title);
-    const password = generateMeetingPassword();
-    const joinUrl = buildJoinUrl(roomName, password, {
-      baseUrl: resolveRequestBaseUrl(request),
+    // Generate unique 8-character room name
+    const roomName = await generateRoomName(async (name) => {
+      const existing = await prisma.meeting.findUnique({
+        where: { roomName: name },
+        select: { id: true },
+      });
+      return !existing;
     });
-    const passwordHash = await hashPassword(password);
 
     const meeting = await prisma.meeting.create({
       data: {
         title,
-        description,
-        startTime,
-        endTime,
         status: MeetingStatus.ACTIVE,
-        isPublic,
-        isInstant: true,
-        passwordHash,
         roomName,
-        joinUrl,
         participants:
           participants && participants.length > 0
             ? {
@@ -73,17 +56,13 @@ export async function POST(request: Request) {
         meeting: {
           id: meeting.id,
           title: meeting.title,
-          description: meeting.description,
-          startTime: meeting.startTime,
-          endTime: meeting.endTime,
           status: meeting.status,
-          isPublic: meeting.isPublic,
-          isInstant: meeting.isInstant,
           roomName: meeting.roomName,
-          joinUrl: meeting.joinUrl,
-          participants: meeting.participants.map((participant) => participant.email),
+          participants: meeting.participants.map((p) => ({
+            email: p.email,
+            name: p.name,
+          })),
         },
-        password,
       },
       { status: 201 },
     );

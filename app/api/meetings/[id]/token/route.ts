@@ -1,5 +1,3 @@
-import { randomUUID } from 'crypto';
-
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
@@ -8,15 +6,11 @@ import {
   createLiveKitToken,
   livekitUrl,
 } from '@/lib/livekit';
-import { normalizeEmail, verifyPassword } from '@/lib/meetings';
+import { normalizeEmail } from '@/lib/meetings';
 
 const tokenRequestSchema = z.object({
-  email: z
-    .union([z.string().email(), z.literal('')])
-    .optional()
-    .transform((value) => (value ? value.trim() : undefined)),
-  password: z.string().min(1),
-  name: z.string().min(1).max(120).optional(),
+  email: z.string().email(),
+  name: z.string().min(1).max(120),
   metadata: z.string().max(1024).optional(),
 });
 
@@ -41,8 +35,9 @@ export async function POST(request: Request, { params }: RouteContext) {
       );
     }
 
-    const { password, name, metadata } = result.data;
-    const email = result.data.email ? normalizeEmail(result.data.email) : undefined;
+    const { email, name, metadata } = result.data;
+    const normalizedEmail = normalizeEmail(email);
+    const trimmedName = name.trim();
 
     const { id } = await params;
 
@@ -59,38 +54,27 @@ export async function POST(request: Request, { params }: RouteContext) {
       return NextResponse.json({ error: 'Meeting not found' }, { status: 404 });
     }
 
-    const passwordMatches = await verifyPassword(password, meeting.passwordHash);
-    if (!passwordMatches) {
-      return NextResponse.json(
-        { error: 'Invalid credentials' },
-        { status: 401 },
-      );
-    }
-
-    if (!meeting.isPublic) {
-      if (!email) {
-        return NextResponse.json(
-          { error: 'Email is required for private meetings' },
-          { status: 400 },
-        );
-      }
-      const authorized = meeting.participants.some(
-        (participant) => participant.email === email,
-      );
-      if (!authorized) {
-        return NextResponse.json(
-          { error: 'Participant not authorized' },
-          { status: 403 },
-        );
-      }
-    }
-
-    const identity = email ?? `guest-${randomUUID()}`;
-    const displayName = name?.trim() || email || 'Guest';
+    // Create or update participant record
+    await prisma.participant.upsert({
+      where: {
+        meetingId_email: {
+          meetingId: id,
+          email: normalizedEmail,
+        },
+      },
+      create: {
+        email: normalizedEmail,
+        name: trimmedName,
+        meetingId: id,
+      },
+      update: {
+        name: trimmedName,
+      },
+    });
 
     const token = await createLiveKitToken({
-      identity,
-      name: displayName,
+      identity: normalizedEmail,
+      name: trimmedName,
       roomName: meeting.roomName,
       metadata,
       roomAdmin: false,
@@ -105,7 +89,6 @@ export async function POST(request: Request, { params }: RouteContext) {
           id: meeting.id,
           title: meeting.title,
           status: meeting.status,
-          isPublic: meeting.isPublic,
         },
       },
       {

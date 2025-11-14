@@ -6,6 +6,7 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import MeetingRoom from '@/components/MeetingRoom';
 import {
   lookupMeetingIdForRoom,
+  loadStoredCredentials,
   useMeetingSession,
 } from '@/lib/meetingSession';
 
@@ -50,14 +51,34 @@ export default function MeetingRoomPage() {
     }
     const storedId = lookupMeetingIdForRoom(roomName);
     if (!storedId && typeof window !== 'undefined') {
+      // Redirect to lobby
       router.replace(`/join/${encodeURIComponent(roomName)}`);
+      return;
+    }
+    
+    // If we have meetingId but no session, redirect to lobby with credentials
+    if (meetingId && !session && !loading && typeof window !== 'undefined') {
+      const credentials = loadStoredCredentials(meetingId);
+      if (credentials) {
+        const params = new URLSearchParams();
+        if (credentials.email) {
+          params.set('email', credentials.email);
+        }
+        if (credentials.name) {
+          params.set('name', credentials.name);
+        }
+        const query = params.toString();
+        router.replace(`/join/${encodeURIComponent(roomName)}${query ? `?${query}` : ''}`);
+      } else {
+        router.replace(`/join/${encodeURIComponent(roomName)}`);
+      }
     }
   }, [loading, meetingId, roomName, router, session]);
 
   if (!roomName) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-950 px-6 py-12">
-        <div className="rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+      <main className="flex min-h-screen items-center justify-center bg-[var(--color-background)] px-4 sm:px-6 py-8 sm:py-12">
+        <div className="rounded-lg border border-error/40 bg-error/10 px-4 py-3 text-sm text-error">
           Missing room identifier.
         </div>
       </main>
@@ -66,8 +87,8 @@ export default function MeetingRoomPage() {
 
   if (loading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-950 px-6 py-12">
-        <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70">
+      <main className="flex min-h-screen items-center justify-center bg-[var(--color-background)] px-4 sm:px-6 py-8 sm:py-12">
+        <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm text-[var(--color-text-muted)]">
           Connecting you to the meeting…
         </div>
       </main>
@@ -75,17 +96,35 @@ export default function MeetingRoomPage() {
   }
 
   if (!meetingId || !session) {
+    // Get credentials to redirect with email/name
+    const credentials = meetingId ? loadStoredCredentials(meetingId) : null;
+    const redirectToLobby = () => {
+      if (credentials) {
+        const params = new URLSearchParams();
+        if (credentials.email) {
+          params.set('email', credentials.email);
+        }
+        if (credentials.name) {
+          params.set('name', credentials.name);
+        }
+        const query = params.toString();
+        router.replace(`/join/${encodeURIComponent(roomName)}${query ? `?${query}` : ''}`);
+      } else {
+        router.replace(`/join/${encodeURIComponent(roomName)}`);
+      }
+    };
+
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-slate-950 px-6 py-12 text-center text-white/80">
-        <div className="max-w-sm rounded-2xl border border-yellow-500/40 bg-yellow-500/10 px-5 py-4 text-sm text-yellow-100">
-          We couldn&apos;t find an active meeting session. Please re-enter the meeting details.
+      <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-[var(--color-background)] px-4 sm:px-6 py-8 sm:py-12 text-center">
+        <div className="max-w-sm rounded-lg border border-warning/40 bg-warning/10 px-4 sm:px-5 py-3 sm:py-4 text-sm text-warning">
+          We couldn&apos;t find an active meeting session. {credentials ? 'You can rejoin using your saved credentials.' : 'Please re-enter the meeting details.'}
         </div>
         <button
           type="button"
-          onClick={() => router.replace(`/join/${encodeURIComponent(roomName)}`)}
-          className="rounded-lg border border-sky-500/50 bg-sky-500/20 px-4 py-2 text-sm font-semibold text-sky-100 transition-colors duration-200 hover:bg-sky-500/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/80"
+          onClick={redirectToLobby}
+          className="rounded-lg border border-primary/50 bg-primary/10 px-4 py-2 text-sm font-semibold text-primary transition-all duration-200 hover:bg-primary/20 hover:border-primary/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/80"
         >
-          Go back to join page
+          {credentials ? 'Rejoin meeting' : 'Go back to join page'}
         </button>
       </main>
     );
@@ -93,22 +132,37 @@ export default function MeetingRoomPage() {
 
   if (error) {
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-slate-950 px-6 py-12 text-center text-white/80">
-        <div className="max-w-sm rounded-2xl border border-red-500/40 bg-red-500/10 px-5 py-4 text-sm text-red-100">
+      <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-[var(--color-background)] px-4 sm:px-6 py-8 sm:py-12 text-center">
+        <div className="max-w-sm rounded-lg border border-error/40 bg-error/10 px-4 sm:px-5 py-3 sm:py-4 text-sm text-error">
           {error}
         </div>
         <div className="flex flex-wrap items-center justify-center gap-3">
           <button
             type="button"
             onClick={() => refresh(true)}
-            className="rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition-colors duration-200 hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/80"
+            className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2 text-sm font-semibold text-[var(--color-text-primary)] transition-all duration-200 hover:bg-[var(--color-surface)]-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/80"
           >
             Try again
           </button>
           <button
             type="button"
-            onClick={() => router.replace(`/join/${encodeURIComponent(roomName)}`)}
-            className="rounded-lg border border-sky-500/50 bg-sky-500/20 px-4 py-2 text-sm font-semibold text-sky-100 transition-colors duration-200 hover:bg-sky-500/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/80"
+            onClick={() => {
+              const credentials = meetingId ? loadStoredCredentials(meetingId) : null;
+              if (credentials) {
+                const params = new URLSearchParams();
+                if (credentials.email) {
+                  params.set('email', credentials.email);
+                }
+                if (credentials.name) {
+                  params.set('name', credentials.name);
+                }
+                const query = params.toString();
+                router.replace(`/join/${encodeURIComponent(roomName)}${query ? `?${query}` : ''}`);
+              } else {
+                router.replace(`/join/${encodeURIComponent(roomName)}`);
+              }
+            }}
+            className="rounded-lg border border-primary/50 bg-primary/10 px-4 py-2 text-sm font-semibold text-primary transition-all duration-200 hover:bg-primary/20 hover:border-primary/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/80"
           >
             Return to join
           </button>

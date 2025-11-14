@@ -1,90 +1,179 @@
 'use client';
 
-import { useMemo } from 'react';
-import type { Participant } from 'livekit-client';
-import { useLocalParticipant, useParticipants } from '@livekit/components-react';
+import { useMemo, useCallback } from 'react';
+import type { Participant, RemoteParticipant } from 'livekit-client';
+import {
+  useLocalParticipant,
+  useParticipants,
+  useRoomContext,
+  useMaybeLayoutContext,
+} from '@livekit/components-react';
+import { Mic, MicOff, Video, VideoOff, User } from 'lucide-react';
 
 const participantName = (participant: Participant | undefined | null) =>
   participant?.name || participant?.identity || 'Participant';
 
-const participantMicrophoneStatus = (participant: Participant) =>
-  participant.isMicrophoneEnabled ? 'Mic on' : 'Mic muted';
-
-const participantCameraStatus = (participant: Participant) =>
-  participant.isCameraEnabled ? 'Camera on' : 'Camera off';
-
 type ParticipantListProps = {
   className?: string;
+  onClose?: () => void;
 };
 
-export function ParticipantList({ className }: ParticipantListProps) {
+export function ParticipantList({ className, onClose }: ParticipantListProps) {
   const remoteParticipants = useParticipants();
   const { localParticipant } = useLocalParticipant();
+  const room = useRoomContext();
+  const layoutContext = useMaybeLayoutContext();
 
   const participants = useMemo(() => {
     const list: Participant[] = [];
+    const seen = new Set<string>();
+    
+    // Add local participant first if it exists
     if (localParticipant) {
-      list.push(localParticipant);
+      const localKey = localParticipant.sid || localParticipant.identity;
+      if (localKey && !seen.has(localKey)) {
+        list.push(localParticipant);
+        seen.add(localKey);
+      }
     }
-    return list.concat(remoteParticipants);
+    
+    // Add remote participants, skipping any duplicates
+    remoteParticipants.forEach((participant) => {
+      const key = participant.sid || participant.identity;
+      if (key && !seen.has(key)) {
+        list.push(participant);
+        seen.add(key);
+      }
+    });
+    
+    return list;
   }, [localParticipant, remoteParticipants]);
 
+  const handleMuteRemote = useCallback(
+    async (participant: RemoteParticipant) => {
+      if (!room || !room.localParticipant.permissions?.canPublish) return;
+
+      try {
+        const microphonePublication = participant.getTrackPublication('microphone');
+        if (microphonePublication?.isMuted) {
+          await room.localParticipant.setSubscribed(microphonePublication.trackSid, true);
+          await microphonePublication.setMuted(false);
+        } else {
+          await microphonePublication?.setMuted(true);
+        }
+      } catch (error) {
+        console.error('Failed to mute/unmute remote participant', error);
+      }
+    },
+    [room],
+  );
+
+  const canManageParticipants = room?.localParticipant.permissions?.canPublish ?? false;
+
   return (
-    <section
-      className={`flex min-h-0 flex-1 flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 shadow-inner ${
-        className ?? ''
-      }`}
+    <div
+      className={`flex flex-col h-full min-h-0 bg-[var(--color-surface)] border-l border-[var(--color-border)] ${className ?? ''}`}
     >
-      <header className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-white/90 tracking-wide">
+      <header className="flex items-center justify-between border-b border-[var(--color-border)] px-3 py-3 sm:px-4">
+        <h2 className="m-0 text-sm font-semibold text-[var(--color-text-primary)] flex items-center gap-2">
           Participants
-          <span className="ml-2 rounded-full bg-white/10 px-2 py-0.5 text-xs font-medium text-white/70">
+          <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-2 rounded-full text-xs font-medium bg-primary/10 text-primary">
             {participants.length}
           </span>
         </h2>
+        {(layoutContext || onClose) && (
+          <button
+            onClick={() => {
+              if (onClose) {
+                onClose();
+              } else if (layoutContext) {
+                layoutContext.widget.dispatch?.({ msg: 'toggle_participants' });
+              }
+            }}
+            className="bg-transparent border-none text-[var(--color-text-muted)] cursor-pointer text-2xl leading-none p-1 flex items-center justify-center hover:text-[var(--color-text-primary)] transition-colors rounded-lg hover:bg-[var(--color-surface)]-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            aria-label="Close participants panel"
+          >
+            ×
+          </button>
+        )}
       </header>
-      <div className="flex-1 min-h-0 overflow-y-auto pr-1 text-sm">
+      <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
         {participants.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-white/10 bg-black/20 px-4 py-6 text-center text-xs text-white/50">
-            No one is here yet. Invite your team to join.
+          <div className="flex flex-col items-center justify-center px-4 py-8 text-center">
+            <User className="w-8 h-8 mb-2 text-[var(--color-text-light)] opacity-50" />
+            <p className="m-0 text-sm text-[var(--color-text-muted)]">
+              No participants yet
+            </p>
           </div>
         ) : (
-          <ul className="space-y-2">
+          <ul className="list-none m-0 p-0">
             {participants.map((participant, index) => {
               const isLocal = participant.isLocal;
               const isSpeaking = participant.isSpeaking;
+              const micEnabled = participant.isMicrophoneEnabled;
+              const cameraEnabled = participant.isCameraEnabled;
+              // Use sid if available, otherwise identity, with index as final fallback
+              const uniqueKey = participant.sid || participant.identity || `participant-${index}`;
+
               return (
                 <li
-                  key={`${participant.sid ?? participant.identity ?? 'participant'}-${index}`}
-                  className={`rounded-xl border px-3 py-3 transition-colors duration-200 ${
-                    isLocal
-                      ? 'border-sky-500/40 bg-sky-500/10'
-                      : 'border-white/10 bg-white/5 hover:bg-white/10'
+                  key={uniqueKey}
+                  className={`px-3 py-3 sm:px-4 border-b border-[var(--color-border)] last:border-b-0 transition-colors ${
+                    isSpeaking ? 'bg-primary/5' : 'bg-transparent'
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 text-sm font-medium text-white">
-                      <span>{participantName(participant)}</span>
-                      {isLocal && (
-                        <span className="rounded-full bg-sky-500/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-sky-200">
-                          You
-                        </span>
-                      )}
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <div
+                        className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold flex-shrink-0 ${
+                          isLocal
+                            ? 'bg-primary text-white'
+                            : 'bg-[var(--color-background-alt)] text-[var(--color-text-primary)] border border-[var(--color-border)]'
+                        }`}
+                      >
+                        {participantName(participant)
+                          .charAt(0)
+                          .toUpperCase()}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-sm font-medium text-[var(--color-text-primary)] overflow-hidden text-ellipsis whitespace-nowrap">
+                            {participantName(participant)}
+                          </span>
+                          {isLocal && (
+                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase bg-primary text-white flex-shrink-0">
+                              You
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-3 text-xs text-[var(--color-text-muted)]">
+                          <span className="flex items-center gap-1">
+                            {micEnabled ? (
+                              <Mic className="w-3 h-3" />
+                            ) : (
+                              <MicOff className="w-3 h-3" />
+                            )}
+                            <span className="hidden sm:inline">{micEnabled ? 'Mic on' : 'Mic off'}</span>
+                          </span>
+                          <span className="flex items-center gap-1">
+                            {cameraEnabled ? (
+                              <Video className="w-3 h-3" />
+                            ) : (
+                              <VideoOff className="w-3 h-3" />
+                            )}
+                            <span className="hidden sm:inline">{cameraEnabled ? 'Camera on' : 'Camera off'}</span>
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                    <span
-                      className={`text-xs font-medium ${
-                        isSpeaking ? 'text-emerald-300' : 'text-white/50'
-                      }`}
-                    >
-                      {isSpeaking ? 'Speaking' : 'Idle'}
-                    </span>
-                  </div>
-                  <div className="mt-2 flex flex-wrap items-center gap-3 text-[11px] text-white/60">
-                    <span>{participantMicrophoneStatus(participant)}</span>
-                    <span aria-hidden className="text-white/30">
-                      •
-                    </span>
-                    <span>{participantCameraStatus(participant)}</span>
+                    {isSpeaking && (
+                      <div
+                        className="w-2 h-2 rounded-full bg-primary flex-shrink-0"
+                        style={{
+                          animation: 'lk-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        }}
+                      />
+                    )}
                   </div>
                 </li>
               );
@@ -92,9 +181,8 @@ export function ParticipantList({ className }: ParticipantListProps) {
           </ul>
         )}
       </div>
-    </section>
+    </div>
   );
 }
 
 export default ParticipantList;
-

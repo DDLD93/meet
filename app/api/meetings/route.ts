@@ -1,43 +1,25 @@
 import { NextResponse } from 'next/server';
-import { MeetingStatus, type Participant } from '@prisma/client';
+import { MeetingStatus } from '@prisma/client';
 
 import prisma from '@/lib/prisma';
-import {
-  buildJoinUrl,
-  buildParticipantCreateData,
-  createMeetingSchema,
-  generateRoomName,
-  hashPassword,
-  resolveRequestBaseUrl,
-} from '@/lib/meetings';
 
-const serializeMeeting = (
-  meeting: {
-    id: string;
-    title: string;
-    description: string | null;
-    startTime: Date;
-    endTime: Date;
-    status: MeetingStatus;
-    isPublic: boolean;
-    isInstant: boolean;
-    roomName: string;
-    joinUrl: string;
-  } & {
-    participants: Participant[];
-  },
-) => ({
+const serializeMeeting = (meeting: {
+  id: string;
+  title: string;
+  status: MeetingStatus;
+  roomName: string;
+  createdAt: Date;
+  participants: Array<{ email: string; name: string }>;
+}) => ({
   id: meeting.id,
   title: meeting.title,
-  description: meeting.description,
-  startTime: meeting.startTime,
-  endTime: meeting.endTime,
   status: meeting.status,
-  isPublic: meeting.isPublic,
-  isInstant: meeting.isInstant,
   roomName: meeting.roomName,
-  joinUrl: meeting.joinUrl,
-  participants: meeting.participants.map((participant) => participant.email),
+  createdAt: meeting.createdAt,
+  participants: meeting.participants.map((p) => ({
+    email: p.email,
+    name: p.name,
+  })),
 });
 
 export async function GET(request: Request) {
@@ -67,10 +49,15 @@ export async function GET(request: Request) {
   const meetings = await prisma.meeting.findMany({
     where,
     include: {
-      participants: true,
+      participants: {
+        select: {
+          email: true,
+          name: true,
+        },
+      },
     },
     orderBy: {
-      startTime: 'desc',
+      createdAt: 'desc',
     },
     take: limit,
   });
@@ -80,68 +67,5 @@ export async function GET(request: Request) {
   });
 }
 
-export async function POST(request: Request) {
-  try {
-    const payload = await request.json();
-    const parsed = await createMeetingSchema.safeParseAsync(payload);
-
-    if (!parsed.success) {
-      return NextResponse.json(
-        {
-          error: 'Validation failed',
-          issues: parsed.error.flatten(),
-        },
-        { status: 400 },
-      );
-    }
-
-    const { title, description, startTime, endTime, isPublic, password, participants } =
-      parsed.data;
-
-    const roomName = generateRoomName(title);
-    const joinUrl = buildJoinUrl(roomName, password, {
-      baseUrl: resolveRequestBaseUrl(request),
-    });
-    const passwordHash = await hashPassword(password);
-
-    const meeting = await prisma.meeting.create({
-      data: {
-        title,
-        description,
-        startTime,
-        endTime,
-        status: MeetingStatus.SCHEDULED,
-        isPublic,
-        isInstant: false,
-        passwordHash,
-        roomName,
-        joinUrl,
-        participants:
-          participants && participants.length > 0
-            ? {
-                create: buildParticipantCreateData(participants),
-              }
-            : undefined,
-      },
-      include: {
-        participants: true,
-      },
-    });
-
-    return NextResponse.json(
-      {
-        meeting: serializeMeeting(meeting),
-        password,
-      },
-      { status: 201 },
-    );
-  } catch (error) {
-    console.error('Failed to create meeting', error);
-
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 },
-    );
-  }
-}
+// POST endpoint removed - use /api/meetings/instant instead
 

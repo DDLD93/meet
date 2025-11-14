@@ -9,7 +9,6 @@ type MeetingSummary = {
   id: string;
   title: string | null;
   status: string;
-  isPublic: boolean;
   roomName: string;
 };
 
@@ -93,22 +92,21 @@ export default function JoinPage() {
     };
   }, [roomName]);
 
-  const initialPassword = searchParams?.get('password') ?? '';
   const initialEmail = searchParams?.get('email') ?? '';
   const initialName = searchParams?.get('name') ?? '';
 
   if (loading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-50 px-6 py-12">
-        <p className="text-sm text-slate-500">Loading meeting…</p>
+      <main className="flex min-h-screen items-center justify-center bg-[var(--color-background)] px-4 sm:px-6 py-8 sm:py-12">
+        <p className="text-sm text-[var(--color-text-muted)]">Loading meeting…</p>
       </main>
     );
   }
 
   if (error) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-50 px-6 py-12">
-        <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+      <main className="flex min-h-screen items-center justify-center bg-[var(--color-background)] px-4 sm:px-6 py-8 sm:py-12">
+        <div className="rounded-lg border border-error/40 bg-error/10 px-4 py-3 text-sm text-error">
           {error}
         </div>
       </main>
@@ -117,8 +115,8 @@ export default function JoinPage() {
 
   if (notFound || !meeting) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-50 px-6 py-12">
-        <div className="rounded-md border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600">
+      <main className="flex min-h-screen items-center justify-center bg-[var(--color-background)] px-4 sm:px-6 py-8 sm:py-12">
+        <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 text-sm text-[var(--color-text-primary)]">
           Meeting not found or is no longer available.
         </div>
       </main>
@@ -130,9 +128,7 @@ export default function JoinPage() {
       meetingId={meeting.id}
       meetingTitle={meeting.title}
       meetingStatus={meeting.status}
-      isPublic={meeting.isPublic}
       roomName={roomName}
-      initialPassword={initialPassword}
       initialEmail={initialEmail}
       initialName={initialName}
     />

@@ -8,7 +8,7 @@ export type StoredMeetingCredentials = {
   meetingTitle?: string | null;
   name: string;
   email?: string;
-  password: string;
+  password?: string; // Optional for backward compatibility
 };
 
 export type StoredMeetingSession = {
@@ -29,7 +29,6 @@ export type TokenResponsePayload = {
     id: string;
     title: string | null;
     status: string;
-    isPublic: boolean;
   };
 };
 
@@ -47,6 +46,13 @@ const getStorage = () => {
     return null;
   }
   return window.sessionStorage;
+};
+
+const getLocalStorage = () => {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+  return window.localStorage;
 };
 
 const decodeTokenExpiry = (token: string) => {
@@ -91,15 +97,30 @@ export const buildSessionFromResponse = (
 export const loadStoredCredentials = (
   meetingId: string,
 ): StoredMeetingCredentials | null => {
-  const storage = getStorage();
-  if (!storage) {
+  // Try localStorage first (persistent), then sessionStorage (fallback)
+  const local = getLocalStorage();
+  const session = getStorage();
+  
+  if (!local && !session) {
     return null;
   }
+  
   try {
-    const raw = storage.getItem(credentialsKey(meetingId));
+    // Check localStorage first
+    let raw = local?.getItem(credentialsKey(meetingId));
+    if (!raw && session) {
+      // Fallback to sessionStorage
+      raw = session.getItem(credentialsKey(meetingId));
+      // If found in sessionStorage, migrate to localStorage
+      if (raw && local) {
+        local.setItem(credentialsKey(meetingId), raw);
+      }
+    }
+    
     if (!raw) {
       return null;
     }
+    
     const parsed = JSON.parse(raw) as StoredMeetingCredentials;
     if (
       typeof parsed !== 'object' ||
@@ -116,40 +137,71 @@ export const loadStoredCredentials = (
 };
 
 export const persistStoredCredentials = (credentials: StoredMeetingCredentials) => {
-  const storage = getStorage();
-  if (!storage) {
+  const local = getLocalStorage();
+  const session = getStorage();
+  
+  if (!local && !session) {
     return;
   }
+  
   try {
-    storage.setItem(credentialsKey(credentials.meetingId), JSON.stringify(credentials));
-    storage.setItem(roomIndexKey(credentials.roomName), credentials.meetingId);
+    const serialized = JSON.stringify(credentials);
+    
+    // Store in localStorage (persistent)
+    if (local) {
+      local.setItem(credentialsKey(credentials.meetingId), serialized);
+      local.setItem(roomIndexKey(credentials.roomName), credentials.meetingId);
+    }
+    
+    // Also store in sessionStorage for immediate access
+    if (session) {
+      session.setItem(credentialsKey(credentials.meetingId), serialized);
+      session.setItem(roomIndexKey(credentials.roomName), credentials.meetingId);
+    }
   } catch (error) {
     console.warn('Failed to persist meeting credentials', error);
   }
 };
 
 export const clearStoredCredentials = (meetingId: string) => {
-  const storage = getStorage();
-  if (!storage) {
-    return;
+  const local = getLocalStorage();
+  const session = getStorage();
+  
+  if (local) {
+    local.removeItem(credentialsKey(meetingId));
   }
-  storage.removeItem(credentialsKey(meetingId));
+  if (session) {
+    session.removeItem(credentialsKey(meetingId));
+  }
 };
 
 export const lookupMeetingIdForRoom = (roomName: string) => {
-  const storage = getStorage();
-  if (!storage) {
-    return null;
+  const local = getLocalStorage();
+  const session = getStorage();
+  
+  // Check localStorage first, then sessionStorage
+  if (local) {
+    const id = local.getItem(roomIndexKey(roomName));
+    if (id) return id;
   }
-  return storage.getItem(roomIndexKey(roomName));
+  
+  if (session) {
+    return session.getItem(roomIndexKey(roomName));
+  }
+  
+  return null;
 };
 
 export const clearRoomMapping = (roomName: string) => {
-  const storage = getStorage();
-  if (!storage) {
-    return;
+  const local = getLocalStorage();
+  const session = getStorage();
+  
+  if (local) {
+    local.removeItem(roomIndexKey(roomName));
   }
-  storage.removeItem(roomIndexKey(roomName));
+  if (session) {
+    session.removeItem(roomIndexKey(roomName));
+  }
 };
 
 export const loadStoredSession = (meetingId: string): StoredMeetingSession | null => {
@@ -218,7 +270,6 @@ export const requestNewSession = async (
     body: JSON.stringify({
       email: credentials.email ?? '',
       name: credentials.name,
-      password: credentials.password,
       metadata: buildMetadata(credentials),
     }),
   });
@@ -266,6 +317,15 @@ export const clearMeetingState = (meetingId: string) => {
   }
   clearStoredSession(meetingId);
   clearStoredCredentials(meetingId);
+};
+
+export const clearSessionOnly = (meetingId: string) => {
+  // Only clear session, keep credentials for rejoining
+  clearStoredSession(meetingId);
+  const credentials = loadStoredCredentials(meetingId);
+  if (credentials) {
+    clearRoomMapping(credentials.roomName);
+  }
 };
 
 export const getStoredSessionForRoom = (roomName: string) => {

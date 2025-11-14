@@ -45,3 +45,7 @@ prisma/migrations
 
 .vercel
 .env*.local
+
+
+.cursor
+meet-main/
