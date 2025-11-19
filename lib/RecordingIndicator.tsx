@@ -1,6 +1,7 @@
 import { useIsRecording } from '@livekit/components-react';
 import * as React from 'react';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
+import { Circle } from 'lucide-react';
 
 export function RecordingIndicator() {
   const isRecording = useIsRecording();
@@ -13,29 +14,23 @@ export function RecordingIndicator() {
         toast('This meeting is being recorded', {
           duration: 3000,
           icon: '🎥',
-          position: 'top-center',
-          className: 'lk-button',
-          style: {
-            backgroundColor: 'var(--lk-danger3)',
-            color: 'var(--lk-fg)',
-          },
         });
       }
     }
-  }, [isRecording]);
+  }, [isRecording, wasRecording]);
+
+  if (!isRecording) {
+    return null;
+  }
 
   return (
-    <div
-      style={{
-        position: 'absolute',
-        top: '0',
-        left: '0',
-        width: '100%',
-        height: '100%',
-        boxShadow: isRecording ? 'var(--lk-danger3) 0px 0px 0px 3px inset' : 'none',
-        pointerEvents: 'none',
-      }}
-    ></div>
+    <div className="fixed top-16 sm:top-20 left-2 sm:left-3 z-[1000] flex items-center gap-2 rounded-lg border border-red-500/50 bg-red-500/10 backdrop-blur-sm px-2.5 sm:px-3 py-1.5 sm:py-2 shadow-lg">
+      <Circle className="w-3 h-3 text-red-500 fill-red-500 animate-pulse" />
+      <span className="text-xs sm:text-sm font-medium text-red-400">
+        <span className="hidden sm:inline">Recording</span>
+        <span className="sm:hidden">Rec</span>
+      </span>
+    </div>
   );
 }
 

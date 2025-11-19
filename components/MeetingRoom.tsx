@@ -27,7 +27,7 @@ import { useRouter } from 'next/navigation';
 import { useSetupE2EE } from '@/lib/useSetupE2EE';
 import { useLowCPUOptimizer } from '@/lib/usePerfomanceOptimiser';
 import { ParticipantList } from './ParticipantList';
-import { ShareButton } from './ShareButton';
+import { Users } from 'lucide-react';
 
 const SHOW_SETTINGS_MENU = process.env.NEXT_PUBLIC_SHOW_SETTINGS_MENU == 'true';
 
@@ -186,12 +186,6 @@ function VideoConferenceComponent(props: {
 
   const [showParticipants, setShowParticipants] = React.useState(false);
 
-  // Generate share URL for the meeting
-  const shareUrl = React.useMemo(() => {
-    if (typeof window === 'undefined' || !props.roomName) return '';
-    return `${window.location.origin}/join/${encodeURIComponent(props.roomName)}`;
-  }, [props.roomName]);
-
   return (
     <div className="lk-room-container relative h-full w-full bg-[var(--color-background)]">
       <RoomContext.Provider value={room}>
@@ -204,36 +198,23 @@ function VideoConferenceComponent(props: {
             />
           </div>
           {showParticipants && (
-            <div className="w-full sm:w-80 lg:w-96 h-full border-l border-[var(--color-border)] bg-[var(--color-surface)]">
+            <div className="w-full sm:w-80 lg:w-96 h-full border-l border-zinc-800 bg-zinc-950">
               <ParticipantList onClose={() => setShowParticipants(false)} />
             </div>
           )}
         </div>
         {!showParticipants && (
-          <div className="fixed top-16 sm:top-20 right-3 sm:right-4 z-[1000] flex flex-col gap-2 items-end">
-            {shareUrl && (
-              <div className="inline-flex items-center gap-2 rounded-full bg-red-600/90 px-3 py-1.5 shadow-xl border border-red-400/80">
-                <span className="text-[11px] font-semibold uppercase tracking-wide text-white/90">
-                  Invite
-                </span>
-                <ShareButton
-                  url={shareUrl}
-                  title={props.meetingTitle || 'Meeting'}
-                  text={`Join me in ${props.meetingTitle || 'this meeting'}`}
-                  size="sm"
-                  variant="ghost"
-                  className="text-white"
-                />
-              </div>
-            )}
-            <button
-              onClick={() => setShowParticipants(true)}
-              className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-xs sm:text-sm font-medium text-[var(--color-text-primary)] shadow-lg hover:bg-[var(--color-surface-hover)] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-              aria-label="Show participants"
-            >
-              Participants ({room.remoteParticipants.size + 1})
-            </button>
-          </div>
+          <button
+            onClick={() => setShowParticipants(true)}
+            className="fixed top-16 sm:top-20 right-2 sm:right-3 z-[1000] flex items-center gap-1.5 rounded-lg border border-zinc-800/50 bg-zinc-900/90 backdrop-blur-sm px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-white shadow-lg hover:bg-zinc-800/50 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/80"
+            aria-label="Show participants"
+          >
+            <Users className="w-4 h-4" />
+            <span className="inline-flex items-center justify-center min-w-[18px] h-4 px-1.5 rounded-full text-[10px] font-semibold bg-red-500/20 text-red-400 border border-red-500/30">
+              {room.remoteParticipants.size + 1}
+            </span>
+            <span className="hidden sm:inline">Participants</span>
+          </button>
         )}
         <DebugMode />
         <RecordingIndicator />

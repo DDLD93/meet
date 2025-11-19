@@ -72,12 +72,12 @@ export function ParticipantList({ className, onClose }: ParticipantListProps) {
 
   return (
     <div
-      className={`flex flex-col h-full min-h-0 bg-[var(--color-surface)] border-l border-[var(--color-border)] ${className ?? ''}`}
+      className={`flex flex-col h-full min-h-0 bg-zinc-950 border-l border-zinc-800 ${className ?? ''}`}
     >
-      <header className="flex items-center justify-between border-b border-[var(--color-border)] px-3 py-3 sm:px-4">
-        <h2 className="m-0 text-sm font-semibold text-[var(--color-text-primary)] flex items-center gap-2">
+      <header className="flex items-center justify-between border-b border-zinc-800 px-3 sm:px-4 py-2.5 sm:py-3">
+        <h2 className="m-0 text-xs sm:text-sm font-semibold text-white flex items-center gap-2">
           Participants
-          <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-2 rounded-full text-xs font-medium bg-primary/10 text-primary">
+          <span className="inline-flex items-center justify-center min-w-[18px] h-4 px-1.5 rounded-full text-[10px] font-semibold bg-red-500/20 text-red-400 border border-red-500/30">
             {participants.length}
           </span>
         </h2>
@@ -90,7 +90,7 @@ export function ParticipantList({ className, onClose }: ParticipantListProps) {
                 layoutContext.widget.dispatch?.({ msg: 'toggle_participants' });
               }
             }}
-            className="bg-transparent border-none text-[var(--color-text-muted)] cursor-pointer text-2xl leading-none p-1 flex items-center justify-center hover:text-[var(--color-text-primary)] transition-colors rounded-lg hover:bg-[var(--color-surface)]-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            className="bg-transparent border-none text-gray-400 cursor-pointer text-xl leading-none p-1.5 flex items-center justify-center hover:text-white transition-colors rounded-lg hover:bg-zinc-800/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/80"
             aria-label="Close participants panel"
           >
             ×
@@ -100,8 +100,8 @@ export function ParticipantList({ className, onClose }: ParticipantListProps) {
       <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
         {participants.length === 0 ? (
           <div className="flex flex-col items-center justify-center px-4 py-8 text-center">
-            <User className="w-8 h-8 mb-2 text-[var(--color-text-light)] opacity-50" />
-            <p className="m-0 text-sm text-[var(--color-text-muted)]">
+            <User className="w-8 h-8 mb-2 text-gray-600 opacity-50" />
+            <p className="m-0 text-xs sm:text-sm text-gray-400">
               No participants yet
             </p>
           </div>
@@ -118,17 +118,17 @@ export function ParticipantList({ className, onClose }: ParticipantListProps) {
               return (
                 <li
                   key={uniqueKey}
-                  className={`px-3 py-3 sm:px-4 border-b border-[var(--color-border)] last:border-b-0 transition-colors ${
-                    isSpeaking ? 'bg-primary/5' : 'bg-transparent'
+                  className={`px-3 sm:px-4 py-2.5 sm:py-3 border-b border-zinc-800 last:border-b-0 transition-colors ${
+                    isSpeaking ? 'bg-red-500/5' : 'bg-transparent'
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className="flex items-center gap-2.5 sm:gap-3 flex-1 min-w-0">
                       <div
-                        className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold flex-shrink-0 ${
+                        className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-xs sm:text-sm font-semibold flex-shrink-0 ${
                           isLocal
-                            ? 'bg-primary text-white'
-                            : 'bg-[var(--color-background-alt)] text-[var(--color-text-primary)] border border-[var(--color-border)]'
+                            ? 'bg-red-600 text-white'
+                            : 'bg-zinc-900 text-white border border-zinc-700'
                         }`}
                       >
                         {participantName(participant)
@@ -136,30 +136,30 @@ export function ParticipantList({ className, onClose }: ParticipantListProps) {
                           .toUpperCase()}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-sm font-medium text-[var(--color-text-primary)] overflow-hidden text-ellipsis whitespace-nowrap">
+                        <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
+                          <span className="text-xs sm:text-sm font-medium text-white overflow-hidden text-ellipsis whitespace-nowrap">
                             {participantName(participant)}
                           </span>
                           {isLocal && (
-                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase bg-primary text-white flex-shrink-0">
+                            <span className="inline-flex items-center px-1 sm:px-1.5 py-0.5 rounded text-[9px] sm:text-[10px] font-semibold uppercase bg-red-600/20 text-red-400 border border-red-500/30 flex-shrink-0">
                               You
                             </span>
                           )}
                         </div>
-                        <div className="flex items-center gap-3 text-xs text-[var(--color-text-muted)]">
+                        <div className="flex items-center gap-2 sm:gap-3 text-[10px] sm:text-xs text-gray-400">
                           <span className="flex items-center gap-1">
                             {micEnabled ? (
-                              <Mic className="w-3 h-3" />
+                              <Mic className="w-3 h-3 text-green-400" />
                             ) : (
-                              <MicOff className="w-3 h-3" />
+                              <MicOff className="w-3 h-3 text-gray-500" />
                             )}
                             <span className="hidden sm:inline">{micEnabled ? 'Mic on' : 'Mic off'}</span>
                           </span>
                           <span className="flex items-center gap-1">
                             {cameraEnabled ? (
-                              <Video className="w-3 h-3" />
+                              <Video className="w-3 h-3 text-green-400" />
                             ) : (
-                              <VideoOff className="w-3 h-3" />
+                              <VideoOff className="w-3 h-3 text-gray-500" />
                             )}
                             <span className="hidden sm:inline">{cameraEnabled ? 'Camera on' : 'Camera off'}</span>
                           </span>
@@ -168,7 +168,7 @@ export function ParticipantList({ className, onClose }: ParticipantListProps) {
                     </div>
                     {isSpeaking && (
                       <div
-                        className="w-2 h-2 rounded-full bg-primary flex-shrink-0"
+                        className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0"
                         style={{
                           animation: 'lk-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                         }}
