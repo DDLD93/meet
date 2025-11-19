@@ -23,7 +23,7 @@
   --color-background-alt: #f9fafb; /* Gray-50 */
   
   /* Text Colors */
-  --color-text-primary: #000000; /* Black on white */
+  --color-text-primary: #fffefe; /* Black on white */
   --color-text-secondary: #4b5563; /* Gray-600 */
   --color-text-muted: #6b7280; /* Gray-500 */
   --color-text-light: #9ca3af; /* Gray-400 */
@@ -96,11 +96,11 @@
    BASE STYLES
    ============================================ */
 
-* {
+/* * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-}
+} */
 
 html {
   color-scheme: light;

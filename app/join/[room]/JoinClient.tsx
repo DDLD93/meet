@@ -4,6 +4,9 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 import MediaPreview from '@/components/MediaPreview';
+import { Nav } from '@/components/Nav';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   buildSessionFromResponse,
   ensureActiveSession,
@@ -276,23 +279,20 @@ export default function JoinClient({
   return (
     <main className="relative min-h-screen bg-black">
       {/* Navigation Bar */}
-      <nav className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-8 py-6">
-        <div className="text-xl font-bold text-white">
-          VINI <span className="text-red-500">MEET</span>
-        </div>
-      </nav>
+      <Nav />
 
       {/* Background Effects */}
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-gradient-to-br from-black via-zinc-950 to-black" />
-        <div className="absolute top-0 right-0 h-[500px] w-[500px] bg-red-600/10 blur-[120px] rounded-full" />
-        <div className="absolute bottom-0 left-0 h-[400px] w-[400px] bg-red-600/5 blur-[100px] rounded-full" />
+        <div className="absolute top-0 right-0 h-[600px] w-[600px] bg-red-600/10 blur-[140px] rounded-full" />
+        <div className="absolute bottom-0 left-0 h-[500px] w-[500px] bg-red-600/5 blur-[120px] rounded-full" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
       </div>
 
       {/* Content */}
-      <div className="relative z-10 flex min-h-screen items-center justify-center px-4 py-8 sm:py-12 lg:py-16">
+      <div className="relative z-10 flex min-h-screen items-center justify-center px-6 sm:px-8 lg:px-12 py-24 sm:py-32">
         <div className="w-full max-w-5xl">
-          <div className="mb-6 sm:mb-8 space-y-4 sm:space-y-5 text-center">
+          <div className="mb-8 sm:mb-10 space-y-4 sm:space-y-5 text-center">
             <div className="flex flex-col items-center gap-2 sm:gap-3">
               <span className="inline-flex items-center gap-2 rounded-full border border-red-500/40 bg-red-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-red-400">
                 Join
@@ -304,87 +304,90 @@ export default function JoinClient({
                 <span className="rounded-full bg-zinc-900/50 px-3 py-1 font-mono text-xs sm:text-sm border border-zinc-800 text-gray-300">
                   Room: {roomName}
                 </span>
-                <span className="text-xs uppercase tracking-wider text-gray-500">
+                <span className="text-xs uppercase tracking-wider text-gray-400">
                   {statusDescription(meetingStatus)}
                 </span>
               </div>
             </div>
           </div>
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] lg:gap-8">
-            <form
-              className="space-y-4 sm:space-y-5 rounded-2xl sm:rounded-3xl border border-zinc-800 bg-zinc-950/80 p-4 sm:p-5 lg:p-6"
-              onSubmit={handleSubmit}
-            >
-              <div className="grid gap-5">
-                <div className="space-y-2.5">
-                  <label className="block text-sm font-semibold text-white">
-                    Room name
-                  </label>
-                  <div className="w-full rounded-xl border border-zinc-800 bg-zinc-900/50 px-4 py-3 text-sm text-gray-300 font-mono">
-                    {room}
+            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 sm:p-8 lg:p-10 shadow-2xl">
+              <form
+                className="space-y-5 sm:space-y-6"
+                onSubmit={handleSubmit}
+              >
+                <div className="grid gap-5">
+                  <div className="space-y-2.5">
+                    <label className="block text-sm font-semibold text-white">
+                      Room name
+                    </label>
+                    <div className="w-full rounded-xl border-2 border-zinc-800 bg-zinc-900/50 px-4 py-3 text-sm text-gray-300 font-mono">
+                      {room}
+                    </div>
+                  </div>
+                  <div className="space-y-2.5">
+                    <label className="block text-sm font-semibold text-white">
+                      Display name
+                    </label>
+                    <Input
+                      type="text"
+                      value={name}
+                      onChange={(event) => !isRejoining && setName(event.target.value)}
+                      placeholder="How should we introduce you?"
+                      required
+                      disabled={disabled || isRejoining}
+                      readOnly={isRejoining}
+                      autoComplete="name"
+                      className="h-12 bg-zinc-900/50 border-2 border-zinc-800 text-white placeholder:text-gray-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/30"
+                    />
+                    {isRejoining && (
+                      <p className="text-xs text-gray-400">
+                        Your name is saved for this meeting and cannot be changed.
+                      </p>
+                    )}
+                  </div>
+                  <div className="space-y-2.5">
+                    <label className="block text-sm font-semibold text-white">
+                      Email address
+                    </label>
+                    <Input
+                      type="email"
+                      value={email || ''}
+                      onChange={(event) => !isRejoining && setEmail(event.target.value)}
+                      placeholder="you@example.com"
+                      required
+                      disabled={disabled || isRejoining}
+                      readOnly={isRejoining}
+                      autoComplete="email"
+                      className="h-12 bg-zinc-900/50 border-2 border-zinc-800 text-white placeholder:text-gray-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/30"
+                    />
+                    {isRejoining && (
+                      <p className="text-xs text-gray-400">
+                        Your email is saved for this meeting and cannot be changed.
+                      </p>
+                    )}
                   </div>
                 </div>
-                <div className="space-y-2.5">
-                  <label className="block text-sm font-semibold text-white">
-                    Display name
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full rounded-xl border border-zinc-800 bg-zinc-900/50 px-4 py-3 text-sm text-white placeholder:text-gray-500 focus-visible:border-red-500 focus-visible:ring-2 focus-visible:ring-red-500/30 outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed"
-                    value={name}
-                    onChange={(event) => !isRejoining && setName(event.target.value)}
-                    placeholder="How should we introduce you?"
-                    required
-                    disabled={disabled || isRejoining}
-                    readOnly={isRejoining}
-                    autoComplete="name"
-                  />
-                  {isRejoining && (
-                    <p className="text-xs text-gray-500">
-                      Your name is saved for this meeting and cannot be changed.
-                    </p>
-                  )}
-                </div>
-                <div className="space-y-2.5">
-                  <label className="block text-sm font-semibold text-white">
-                    Email address
-                  </label>
-                  <input
-                    type="email"
-                    className="w-full rounded-xl border border-zinc-800 bg-zinc-900/50 px-4 py-3 text-sm text-white placeholder:text-gray-500 focus-visible:border-red-500 focus-visible:ring-2 focus-visible:ring-red-500/30 outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed"
-                    value={email || ''}
-                    onChange={(event) => !isRejoining && setEmail(event.target.value)}
-                    placeholder="you@example.com"
-                    required
-                    disabled={disabled || isRejoining}
-                    readOnly={isRejoining}
-                    autoComplete="email"
-                  />
-                  {isRejoining && (
-                    <p className="text-xs text-gray-500">
-                      Your email is saved for this meeting and cannot be changed.
-                    </p>
-                  )}
-                </div>
-              </div>
-              {error && (
-                <div className="rounded-xl border border-red-500/40 bg-red-500/10 px-3 sm:px-4 py-2.5 sm:py-3 text-sm text-red-400">
-                  {error}
-                </div>
-              )}
-              <button
-                type="submit"
-                className="group relative flex w-full items-center justify-center gap-2 rounded-xl bg-red-600 px-6 py-3.5 text-sm font-semibold text-white transition-all duration-200 hover:bg-red-500 hover:shadow-[0_20px_40px_rgba(239,68,68,0.4)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/80 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:shadow-none disabled:hover:bg-red-600"
-                disabled={
-                  disabled ||
-                  loading ||
-                  !name.trim() ||
-                  !email.trim()
-                }
-              >
-                {loading ? 'Connecting…' : isRejoining ? 'Rejoin meeting' : 'Join meeting'}
-              </button>
-            </form>
+                {error && (
+                  <div className="rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+                    {error}
+                  </div>
+                )}
+                <Button
+                  type="submit"
+                  size="lg"
+                  disabled={
+                    disabled ||
+                    loading ||
+                    !name.trim() ||
+                    !email.trim()
+                  }
+                  className="w-full h-14 bg-red-600 text-white hover:bg-red-500 hover:shadow-[0_20px_40px_rgba(239,68,68,0.4)] transition-all duration-200 disabled:hover:shadow-none disabled:hover:bg-red-600"
+                >
+                  {loading ? 'Connecting…' : isRejoining ? 'Rejoin meeting' : 'Join meeting'}
+                </Button>
+              </form>
+            </div>
             <MediaPreview className="h-full" />
           </div>
         </div>

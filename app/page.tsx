@@ -2,11 +2,12 @@
 
 import { useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Video, ArrowRight, Sparkles } from 'lucide-react';
+import { Video, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Nav } from '@/components/Nav';
 
 export default function Home() {
   const [joinCode, setJoinCode] = useState('');
@@ -94,97 +95,93 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-black">
       {/* Navigation Bar */}
-      <nav className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-8 py-6">
-        <div className="flex items-center gap-2">
-          <div className="text-xl font-bold text-white">
-            VINI <span className="text-red-500">MEET</span>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Sparkles className="h-4 w-4 text-red-500" />
-          <span className="text-xs text-gray-400">Enterprise Ready</span>
-        </div>
-      </nav>
+      <Nav showEnterpriseBadge />
 
       {/* Hero Section */}
       <div className="relative flex min-h-screen">
         {/* Background Effects */}
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-gradient-to-br from-black via-zinc-950 to-black" />
-          <div className="absolute top-0 right-0 h-[500px] w-[500px] bg-red-600/10 blur-[120px] rounded-full" />
-          <div className="absolute bottom-0 left-0 h-[400px] w-[400px] bg-red-600/5 blur-[100px] rounded-full" />
+          <div className="absolute top-0 right-0 h-[600px] w-[600px] bg-red-600/10 blur-[140px] rounded-full" />
+          <div className="absolute bottom-0 left-0 h-[500px] w-[500px] bg-red-600/5 blur-[120px] rounded-full" />
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
         </div>
 
         {/* Content Container */}
-        <div className="relative z-10 flex w-full max-w-6xl mx-auto items-center px-8 py-20">
-          <div className="w-full max-w-2xl mx-auto">
-            
-            <div className="space-y-8">
-              <div className="space-y-6">
-                <h1 className="text-5xl lg:text-7xl font-bold text-white leading-[1.1]">
-                  Video calls with
-                  <span className="block text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-red-600">
-                    anyone, anytime
-                  </span>
-                </h1>
-                
-                <p className="text-lg text-gray-400 max-w-lg">
-                  Professional video conferencing with a modern interface. 
-                  Start instantly or join with a code.
-                </p>
-              </div>
-
-              {/* Action Section */}
-              <div className="space-y-4">
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <button
-                    onClick={handleCreateMeeting}
-                    disabled={creating}
-                    className="group relative px-8 py-4 bg-red-600 text-white rounded-xl font-semibold 
-                               hover:bg-red-500 transition-all duration-200 hover:shadow-[0_20px_40px_rgba(239,68,68,0.4)]
-                               disabled:opacity-60 disabled:hover:shadow-none disabled:hover:bg-red-600 flex items-center justify-center gap-3"
-                  >
-                    <Video className="h-5 w-5" />
-                    <span>{creating ? 'Creating...' : 'Start a meeting for free'}</span>
-                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                  </button>
+        <div className="relative z-10 flex w-full max-w-5xl mx-auto items-center px-6 sm:px-8 lg:px-12 py-24 sm:py-32">
+          <div className="w-full">
+            {/* Glassmorphism Panel */}
+            <div className="relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl m-12 p-8 sm:p-10 lg:p-12 shadow-2xl">
+              <div className="space-y-10 sm:space-y-12">
+                <div className="space-y-6">
+                  <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold text-red-500 leading-[1.1]">
+                    <span className="text-white">Video calls with</span>
+                    <span className="block text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-red-600">
+                      anyone, anytime
+                    </span>
+                  </h1>
                   
-                  <div className="relative flex-1 max-w-sm">
-                    <Input
-                      type="text"
-                      placeholder="Enter code or paste link"
-                      value={joinCode}
-                      onChange={(e) => setJoinCode(e.target.value)}
-                      onKeyPress={handleJoinKeyPress}
-                      className="h-14 w-full pl-5 pr-28 bg-zinc-900/50 border border-zinc-800 text-white 
-                                 placeholder:text-gray-500 rounded-xl focus:border-red-500 
-                                 focus:ring-2 focus:ring-red-500/30"
-                    />
-                    <button
-                      onClick={handleJoinMeeting}
-                      disabled={joining || !joinCode.trim()}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 px-5 py-2.5 bg-white text-black 
-                                 rounded-lg font-semibold text-sm hover:bg-gray-100 transition-colors
-                                 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {joining ? '...' : 'Join'}
-                    </button>
-                  </div>
+                  <p className="text-base sm:text-lg text-gray-400 max-w-xl">
+                    Professional video conferencing with a modern interface. 
+                    Start instantly or join with a code.
+                  </p>
                 </div>
 
-                {/* Features */}
-                <div className="flex flex-wrap gap-6 pt-4">
-                  <div className="flex items-center gap-2 text-sm text-gray-400">
-                    <div className="h-2 w-2 rounded-full bg-green-500" />
-                    <span>No downloads</span>
+                {/* Action Section */}
+                <div className="space-y-6">
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <Button
+                      onClick={handleCreateMeeting}
+                      disabled={creating}
+                      size="lg"
+                      className="group h-14 px-8 bg-red-600 text-white rounded-xl font-semibold 
+                                 hover:bg-red-500 transition-all duration-200 hover:shadow-[0_20px_40px_rgba(239,68,68,0.4)]
+                                 disabled:opacity-60 disabled:hover:shadow-none disabled:hover:bg-red-600 
+                                 flex items-center justify-center gap-3 text-base"
+                    >
+                      <Video className="h-5 w-5" />
+                      <span>{creating ? 'Creating...' : 'Start a meeting for free'}</span>
+                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    </Button>
+                    
+                    <div className="relative flex-1 max-w-sm">
+                      <Input
+                        type="text"
+                        placeholder="Enter code or paste link"
+                        value={joinCode}
+                        onChange={(e) => setJoinCode(e.target.value)}
+                        onKeyPress={handleJoinKeyPress}
+                        className="h-14 w-full pl-5 pr-28 bg-zinc-900/50 border-2 border-zinc-800 text-white 
+                                   placeholder:text-gray-500 rounded-xl focus:border-red-500 
+                                   focus:ring-2 focus:ring-red-500/30 text-base"
+                      />
+                      <Button
+                        onClick={handleJoinMeeting}
+                        disabled={joining || !joinCode.trim()}
+                        size="sm"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 px-5 py-2.5 bg-white text-gray-900 
+                                   rounded-lg font-semibold hover:bg-gray-50 transition-colors
+                                   disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+                      >
+                        {joining ? '...' : 'Join'}
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-400">
-                    <div className="h-2 w-2 rounded-full bg-green-500" />
-                    <span>HD quality</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-400">
-                    <div className="h-2 w-2 rounded-full bg-green-500" />
-                    <span>Secure & encrypted</span>
+
+                  {/* Features */}
+                  <div className="flex flex-wrap gap-6 pt-2">
+                    <div className="flex items-center gap-2.5 text-sm text-gray-400">
+                      <div className="h-2 w-2 rounded-full bg-green-500" />
+                      <span>No downloads</span>
+                    </div>
+                    <div className="flex items-center gap-2.5 text-sm text-gray-400">
+                      <div className="h-2 w-2 rounded-full bg-green-500" />
+                      <span>HD quality</span>
+                    </div>
+                    <div className="flex items-center gap-2.5 text-sm text-gray-400">
+                      <div className="h-2 w-2 rounded-full bg-green-500" />
+                      <span>Secure & encrypted</span>
+                    </div>
                   </div>
                 </div>
               </div>
