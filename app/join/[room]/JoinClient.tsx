@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 
 import MediaPreview from '@/components/MediaPreview';
 import { Nav } from '@/components/Nav';
+import { ShareButton } from '@/components/ShareButton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -49,6 +50,11 @@ export default function JoinClient({
 }: JoinClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  // Generate share URL
+  const shareUrl = typeof window !== 'undefined' 
+    ? `${window.location.origin}/join/${encodeURIComponent(roomName)}`
+    : '';
 
   // Read email and name from query params, fallback to initial props
   const emailFromQuery = searchParams?.get('email') ?? '';
@@ -300,10 +306,27 @@ export default function JoinClient({
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white">
                 {meetingTitle ?? 'Meeting'}
               </h1>
-              <div className="flex flex-col items-center gap-1.5 text-sm text-gray-400">
-                <span className="rounded-full bg-zinc-900/50 px-3 py-1 font-mono text-xs sm:text-sm border border-zinc-800 text-gray-300">
-                  Room: {roomName}
-                </span>
+              <div className="flex flex-col items-center gap-3 text-sm text-gray-400">
+                <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3">
+                  <span className="rounded-full bg-zinc-900/70 px-3 py-1 font-mono text-xs sm:text-sm border border-red-500/60 text-gray-100 shadow-md">
+                    Room: {roomName}
+                  </span>
+                  {shareUrl && (
+                    <div className="inline-flex items-center gap-2 rounded-full bg-red-600/60 border border-red-400/80 px-3 py-1.5 shadow-xl">
+                      <span className="text-[11px] font-semibold uppercase tracking-wide text-white/90">
+                        Invite link
+                      </span>
+                      <ShareButton
+                        url={shareUrl}
+                        title={meetingTitle || 'Meeting'}
+                        text={`Join me in ${meetingTitle || 'this meeting'}`}
+                        size="sm"
+                        variant="ghost"
+                        className="text-white"
+                      />
+                    </div>
+                  )}
+                </div>
                 <span className="text-xs uppercase tracking-wider text-gray-400">
                   {statusDescription(meetingStatus)}
                 </span>

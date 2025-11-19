@@ -27,6 +27,7 @@ import { useRouter } from 'next/navigation';
 import { useSetupE2EE } from '@/lib/useSetupE2EE';
 import { useLowCPUOptimizer } from '@/lib/usePerfomanceOptimiser';
 import { ParticipantList } from './ParticipantList';
+import { ShareButton } from './ShareButton';
 
 const SHOW_SETTINGS_MENU = process.env.NEXT_PUBLIC_SHOW_SETTINGS_MENU == 'true';
 
@@ -57,6 +58,8 @@ export function MeetingRoom({
         serverUrl={serverUrl}
         token={token}
         options={{ codec, hq }}
+        roomName={roomName}
+        meetingTitle={meetingTitle}
       />
     </main>
   );
@@ -69,6 +72,8 @@ function VideoConferenceComponent(props: {
     hq: boolean;
     codec: VideoCodec;
   };
+  roomName?: string | null;
+  meetingTitle?: string | null;
 }) {
   const keyProvider = new ExternalE2EEKeyProvider();
   const { worker, e2eePassphrase } = useSetupE2EE();
@@ -181,6 +186,12 @@ function VideoConferenceComponent(props: {
 
   const [showParticipants, setShowParticipants] = React.useState(false);
 
+  // Generate share URL for the meeting
+  const shareUrl = React.useMemo(() => {
+    if (typeof window === 'undefined' || !props.roomName) return '';
+    return `${window.location.origin}/join/${encodeURIComponent(props.roomName)}`;
+  }, [props.roomName]);
+
   return (
     <div className="lk-room-container relative h-full w-full bg-[var(--color-background)]">
       <RoomContext.Provider value={room}>
@@ -199,13 +210,30 @@ function VideoConferenceComponent(props: {
           )}
         </div>
         {!showParticipants && (
-          <button
-            onClick={() => setShowParticipants(true)}
-            className="fixed top-16 sm:top-20 right-3 sm:right-4 z-[1000] rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-xs sm:text-sm font-medium text-[var(--color-text-primary)] shadow-lg hover:bg-[var(--color-surface)]-hover transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-            aria-label="Show participants"
-          >
-            Participants ({room.remoteParticipants.size + 1})
-          </button>
+          <div className="fixed top-16 sm:top-20 right-3 sm:right-4 z-[1000] flex flex-col gap-2 items-end">
+            {shareUrl && (
+              <div className="inline-flex items-center gap-2 rounded-full bg-red-600/90 px-3 py-1.5 shadow-xl border border-red-400/80">
+                <span className="text-[11px] font-semibold uppercase tracking-wide text-white/90">
+                  Invite
+                </span>
+                <ShareButton
+                  url={shareUrl}
+                  title={props.meetingTitle || 'Meeting'}
+                  text={`Join me in ${props.meetingTitle || 'this meeting'}`}
+                  size="sm"
+                  variant="ghost"
+                  className="text-white"
+                />
+              </div>
+            )}
+            <button
+              onClick={() => setShowParticipants(true)}
+              className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-xs sm:text-sm font-medium text-[var(--color-text-primary)] shadow-lg hover:bg-[var(--color-surface-hover)] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              aria-label="Show participants"
+            >
+              Participants ({room.remoteParticipants.size + 1})
+            </button>
+          </div>
         )}
         <DebugMode />
         <RecordingIndicator />
