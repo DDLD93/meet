@@ -108,40 +108,40 @@ export default function Home() {
         </div>
 
         {/* Content Container */}
-        <div className="relative z-10 flex w-full max-w-5xl mx-auto items-center px-6 sm:px-8 lg:px-12 py-24 sm:py-32">
+        <div className="relative z-10 flex w-full max-w-5xl mx-auto items-center px-4 sm:px-6 lg:px-12 py-4 sm:py-24">
           <div className="w-full">
             {/* Glassmorphism Panel */}
-            <div className="relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl m-12 p-8 sm:p-10 lg:p-12 shadow-2xl">
-              <div className="space-y-10 sm:space-y-12">
-                <div className="space-y-6">
-                  <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold text-red-500 leading-[1.1]">
+            <div className="relative sm:bg-white/5 sm:backdrop-blur-xl sm:border sm:border-white/10 rounded-2xl m-0 sm:m-12 p-6 sm:p-10 lg:p-12 sm:shadow-2xl">
+              <div className="space-y-6 sm:space-y-10">
+                <div className="space-y-4 sm:space-y-6">
+                  <h1 className="text-3xl sm:text-5xl lg:text-7xl font-bold text-red-500 leading-[1.1]">
                     <span className="text-white">Video calls with</span>
                     <span className="block text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-red-600">
                       anyone, anytime
                     </span>
                   </h1>
                   
-                  <p className="text-base sm:text-lg text-gray-400 max-w-xl">
+                  <p className="text-sm sm:text-base lg:text-lg text-gray-400 max-w-xl">
                     Professional video conferencing with a modern interface. 
                     Start instantly or join with a code.
                   </p>
                 </div>
 
                 {/* Action Section */}
-                <div className="space-y-6">
-                  <div className="flex flex-col sm:flex-row gap-4">
+                <div className="space-y-4 sm:space-y-6">
+                  <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                     <Button
                       onClick={handleCreateMeeting}
                       disabled={creating}
                       size="lg"
-                      className="group h-14 px-8 bg-red-600 text-white rounded-xl font-semibold 
+                      className="group h-12 sm:h-14 px-6 sm:px-8 bg-red-600 text-white rounded-xl font-semibold 
                                  hover:bg-red-500 transition-all duration-200 hover:shadow-[0_20px_40px_rgba(239,68,68,0.4)]
                                  disabled:opacity-60 disabled:hover:shadow-none disabled:hover:bg-red-600 
-                                 flex items-center justify-center gap-3 text-base"
+                                 flex items-center justify-center gap-2 sm:gap-3 text-sm sm:text-base"
                     >
-                      <Video className="h-5 w-5" />
+                      <Video className="h-4 w-4 sm:h-5 sm:w-5" />
                       <span>{creating ? 'Creating...' : 'Start a meeting for free'}</span>
-                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                      <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4 transition-transform group-hover:translate-x-1" />
                     </Button>
                     
                     <div className="relative flex-1 max-w-sm">
@@ -151,17 +151,17 @@ export default function Home() {
                         value={joinCode}
                         onChange={(e) => setJoinCode(e.target.value)}
                         onKeyPress={handleJoinKeyPress}
-                        className="h-14 w-full pl-5 pr-28 bg-zinc-900/50 border-2 border-zinc-800 text-white 
+                        className="h-12 sm:h-14 w-full pl-4 sm:pl-5 pr-24 sm:pr-28 bg-zinc-900/50 border-2 border-zinc-800 text-white 
                                    placeholder:text-gray-500 rounded-xl focus:border-red-500 
-                                   focus:ring-2 focus:ring-red-500/30 text-base"
+                                   focus:ring-2 focus:ring-red-500/30 text-sm sm:text-base"
                       />
                       <Button
                         onClick={handleJoinMeeting}
                         disabled={joining || !joinCode.trim()}
                         size="sm"
-                        className="absolute right-2 top-1/2 -translate-y-1/2 px-5 py-2.5 bg-white text-gray-900 
+                        className="absolute right-1.5 sm:right-2 top-1/2 -translate-y-1/2 px-4 sm:px-5 py-2 sm:py-2.5 bg-white text-gray-900 
                                    rounded-lg font-semibold hover:bg-gray-50 transition-colors
-                                   disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+                                   disabled:opacity-50 disabled:cursor-not-allowed shadow-md text-xs sm:text-sm"
                       >
                         {joining ? '...' : 'Join'}
                       </Button>
@@ -169,7 +169,7 @@ export default function Home() {
                   </div>
 
                   {/* Features */}
-                  <div className="flex flex-wrap gap-6 pt-2">
+                  <div className="flex flex-wrap gap-4 sm:gap-6 pt-1 sm:pt-2">
                     <div className="flex items-center gap-2.5 text-sm text-gray-400">
                       <div className="h-2 w-2 rounded-full bg-green-500" />
                       <span>No downloads</span>

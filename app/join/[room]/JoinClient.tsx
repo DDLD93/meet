@@ -296,60 +296,44 @@ export default function JoinClient({
       </div>
 
       {/* Content */}
-      <div className="relative z-10 flex min-h-screen items-center justify-center px-6 sm:px-8 lg:px-12 py-24 sm:py-32">
+      <div className="relative z-10 flex min-h-screen items-center justify-center px-4 sm:px-6 lg:px-12 py-4 sm:py-16 lg:py-24">
         <div className="w-full max-w-5xl">
-          <div className="mb-8 sm:mb-10 space-y-4 sm:space-y-5 text-center">
+          <div className="mb-4 sm:mb-6 space-y-2 sm:space-y-3 text-center">
             <div className="flex flex-col items-center gap-2 sm:gap-3">
-              <span className="inline-flex items-center gap-2 rounded-full border border-red-500/40 bg-red-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-red-400">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-red-500/40 bg-red-500/10 px-2 sm:px-2.5 py-0.5 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-red-400">
                 Join
               </span>
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white">
-                {meetingTitle ?? 'Meeting'}
-              </h1>
-              <div className="flex flex-col items-center gap-3 text-sm text-gray-400">
-                <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3">
-                  <span className="rounded-full bg-zinc-900/70 px-3 py-1 font-mono text-xs sm:text-sm border border-red-500/60 text-gray-100 shadow-md">
-                    Room: {roomName}
-                  </span>
-                  {shareUrl && (
-                    <div className="inline-flex items-center gap-2 rounded-full bg-red-600/60 border border-red-400/80 px-3 py-1.5 shadow-xl">
-                      <span className="text-[11px] font-semibold uppercase tracking-wide text-white/90">
-                        Invite link
-                      </span>
-                      <ShareButton
-                        url={shareUrl}
-                        title={meetingTitle || 'Meeting'}
-                        text={`Join me in ${meetingTitle || 'this meeting'}`}
-                        size="sm"
-                        variant="ghost"
-                        className="text-white"
-                      />
-                    </div>
-                  )}
-                </div>
-                <span className="text-xs uppercase tracking-wider text-gray-400">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <h1 className="text-xl sm:text-3xl lg:text-4xl font-bold text-white">
+                  {meetingTitle ?? 'Meeting'}
+                </h1>
+                {shareUrl && (
+                  <ShareButton
+                    url={shareUrl}
+                    title={meetingTitle || 'Meeting'}
+                    text={`Join me in ${meetingTitle || 'this meeting'}`}
+                    size="sm"
+                    variant="ghost"
+                    className="text-white hover:text-red-400"
+                  />
+                )}
+              </div>
+              {statusDescription(meetingStatus) && (
+                <span className="text-[10px] sm:text-xs text-gray-400">
                   {statusDescription(meetingStatus)}
                 </span>
-              </div>
+              )}
             </div>
           </div>
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] lg:gap-8">
-            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 sm:p-8 lg:p-10 shadow-2xl">
+          <div className="grid gap-4 sm:gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.85fr)] lg:gap-6">
+            <div className="sm:bg-white/5 sm:backdrop-blur-xl sm:border sm:border-white/10 rounded-2xl p-4 sm:p-6 lg:p-8 sm:shadow-2xl">
               <form
-                className="space-y-5 sm:space-y-6"
+                className="space-y-4"
                 onSubmit={handleSubmit}
               >
-                <div className="grid gap-5">
-                  <div className="space-y-2.5">
-                    <label className="block text-sm font-semibold text-white">
-                      Room name
-                    </label>
-                    <div className="w-full rounded-xl border-2 border-zinc-800 bg-zinc-900/50 px-4 py-3 text-sm text-gray-300 font-mono">
-                      {room}
-                    </div>
-                  </div>
-                  <div className="space-y-2.5">
-                    <label className="block text-sm font-semibold text-white">
+                <div className="grid gap-3 sm:gap-4">
+                  <div className="space-y-1.5 sm:space-y-2">
+                    <label className="block text-xs sm:text-sm font-semibold text-white">
                       Display name
                     </label>
                     <Input
@@ -361,16 +345,16 @@ export default function JoinClient({
                       disabled={disabled || isRejoining}
                       readOnly={isRejoining}
                       autoComplete="name"
-                      className="h-12 bg-zinc-900/50 border-2 border-zinc-800 text-white placeholder:text-gray-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/30"
+                      className="h-10 sm:h-11 bg-zinc-900/50 border-2 border-zinc-800 text-white placeholder:text-gray-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/30 text-sm"
                     />
                     {isRejoining && (
-                      <p className="text-xs text-gray-400">
+                      <p className="text-[10px] sm:text-xs text-gray-400">
                         Your name is saved for this meeting and cannot be changed.
                       </p>
                     )}
                   </div>
-                  <div className="space-y-2.5">
-                    <label className="block text-sm font-semibold text-white">
+                  <div className="space-y-1.5 sm:space-y-2">
+                    <label className="block text-xs sm:text-sm font-semibold text-white">
                       Email address
                     </label>
                     <Input
@@ -382,17 +366,17 @@ export default function JoinClient({
                       disabled={disabled || isRejoining}
                       readOnly={isRejoining}
                       autoComplete="email"
-                      className="h-12 bg-zinc-900/50 border-2 border-zinc-800 text-white placeholder:text-gray-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/30"
+                      className="h-10 sm:h-11 bg-zinc-900/50 border-2 border-zinc-800 text-white placeholder:text-gray-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/30 text-sm"
                     />
                     {isRejoining && (
-                      <p className="text-xs text-gray-400">
+                      <p className="text-[10px] sm:text-xs text-gray-400">
                         Your email is saved for this meeting and cannot be changed.
                       </p>
                     )}
                   </div>
                 </div>
                 {error && (
-                  <div className="rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+                  <div className="rounded-xl border border-red-500/40 bg-red-500/10 px-3 py-2 text-xs text-red-400">
                     {error}
                   </div>
                 )}
@@ -405,7 +389,7 @@ export default function JoinClient({
                     !name.trim() ||
                     !email.trim()
                   }
-                  className="w-full h-14 bg-red-600 text-white hover:bg-red-500 hover:shadow-[0_20px_40px_rgba(239,68,68,0.4)] transition-all duration-200 disabled:hover:shadow-none disabled:hover:bg-red-600"
+                  className="w-full h-11 sm:h-12 bg-red-600 text-white hover:bg-red-500 hover:shadow-[0_20px_40px_rgba(239,68,68,0.4)] transition-all duration-200 disabled:hover:shadow-none disabled:hover:bg-red-600 text-sm"
                 >
                   {loading ? 'Connecting…' : isRejoining ? 'Rejoin meeting' : 'Join meeting'}
                 </Button>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Video, VideoOff, Mic, MicOff, Play, Square } from 'lucide-react';
 
 type MediaPreviewProps = {
   className?: string;
@@ -209,81 +210,143 @@ export default function MediaPreview({ className, onStatusChange }: MediaPreview
 
   return (
     <section
-      className={`flex flex-col gap-4 rounded-2xl border border-zinc-800 bg-zinc-950/80 p-4 sm:p-5 ${
+      className={`flex flex-col gap-3 sm:gap-4 rounded-xl sm:rounded-2xl border border-zinc-800 bg-zinc-950/80 p-3 sm:p-4 ${
         className ?? ''
       }`}
     >
-      <header className="flex flex-col gap-2">
-        <h2 className="text-base font-bold uppercase tracking-wider text-white">
+      <header className="flex items-center justify-between">
+        <h2 className="text-xs sm:text-sm font-semibold text-white">
           Test your setup
         </h2>
-        <p className="text-xs text-gray-400">
-          Verify camera framing and microphone levels before you join the room.
-        </p>
+        <button
+          type="button"
+          onClick={handleTogglePreview}
+          disabled={loading}
+          className={`flex items-center gap-1.5 rounded-lg px-2.5 sm:px-3 py-1.5 sm:py-2 text-[10px] sm:text-xs font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/80 disabled:cursor-not-allowed disabled:opacity-50 ${
+            stream
+              ? 'border border-red-600/50 bg-red-600/10 text-red-400 hover:bg-red-600/20 hover:border-red-600/70'
+              : 'border border-zinc-700 bg-zinc-800/50 text-white hover:bg-zinc-700 hover:border-zinc-600'
+          }`}
+        >
+          {stream ? (
+            <>
+              <Square className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+              <span>Stop</span>
+            </>
+          ) : (
+            <>
+              <Play className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+              <span>Start</span>
+            </>
+          )}
+        </button>
       </header>
-      <div className="relative w-full overflow-hidden rounded-xl border border-zinc-800 bg-black">
+      
+      <div className="relative w-full overflow-hidden rounded-lg border border-zinc-800 bg-black aspect-video">
         {stream ? (
           <video
             ref={videoRef}
             playsInline
             muted
-            className="h-40 w-full object-cover sm:h-48 lg:h-56"
+            className="h-full w-full object-cover"
           />
         ) : (
-          <div className="flex h-40 w-full items-center justify-center bg-zinc-900/50 text-center text-xs text-gray-500 sm:h-48 lg:h-56">
-            Camera preview will appear here once you start testing.
+          <div className="flex h-full w-full items-center justify-center bg-zinc-900/50">
+            <div className="text-center space-y-2">
+              <Video className="w-8 h-8 sm:w-10 sm:h-10 mx-auto text-gray-600" />
+              <p className="text-[10px] sm:text-xs text-gray-500 px-4">
+                Camera preview will appear here
+              </p>
+            </div>
           </div>
         )}
         {!videoActive && stream && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/70 text-sm font-medium text-white">
-            Camera paused
+          <div className="absolute inset-0 flex items-center justify-center bg-black/80">
+            <div className="text-center space-y-2">
+              <VideoOff className="w-8 h-8 sm:w-10 sm:h-10 mx-auto text-gray-400" />
+              <p className="text-xs sm:text-sm text-gray-300">Camera paused</p>
+            </div>
           </div>
         )}
       </div>
-      <div className="flex flex-col gap-4 rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
-        <div className="flex flex-col gap-2">
-          <span className="text-xs font-semibold uppercase tracking-wider text-gray-300">Mic level</span>
-          <div className="h-2 rounded-full bg-zinc-800">
-            <div
-              className="h-2 rounded-full bg-red-500 transition-[width] duration-150"
-              style={{ width: `${Math.max(4, audioLevel * 100)}%` }}
-            />
+
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <div className="flex-1 space-y-1.5">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] sm:text-xs font-medium text-gray-300 flex items-center gap-1.5">
+                {audioActive ? (
+                  <Mic className="w-3 h-3 text-green-400" />
+                ) : (
+                  <MicOff className="w-3 h-3 text-gray-500" />
+                )}
+                Microphone
+              </span>
+              <span className="text-[10px] text-gray-500">
+                {audioActive ? 'Active' : 'Muted'}
+              </span>
+            </div>
+            <div className="h-1.5 rounded-full bg-zinc-800 overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-[width] duration-150 ${
+                  audioActive ? 'bg-red-500' : 'bg-gray-600'
+                }`}
+                style={{ width: `${Math.max(2, audioLevel * 100)}%` }}
+              />
+            </div>
           </div>
-          <span className="text-[11px] text-gray-500">
-            {audioActive
-              ? 'Speak into your microphone to see the meter move.'
-              : 'Microphone muted.'}
-          </span>
         </div>
+
         {error && (
-          <div className="rounded-xl border border-red-500/40 bg-red-500/10 p-3 text-[11px] text-red-400">
+          <div className="rounded-lg border border-red-500/40 bg-red-500/10 p-2.5 text-[10px] sm:text-xs text-red-400">
             {error}
           </div>
         )}
-        <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={handleTogglePreview}
-            className="flex-1 rounded-xl border border-red-600/50 bg-red-600/10 px-3 py-2.5 text-xs font-semibold uppercase tracking-wide text-white transition-all duration-200 hover:bg-red-600/20 hover:border-red-600/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/80 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-red-600/10"
-            disabled={loading}
-          >
-            {stream ? 'Stop Test' : 'Start Test'}
-          </button>
+
+        <div className="flex gap-2">
           <button
             type="button"
             onClick={handleToggleVideo}
-            className="flex-1 rounded-xl border border-zinc-700 bg-zinc-800/50 px-3 py-2.5 text-xs font-semibold uppercase tracking-wide text-white transition-all duration-200 hover:bg-zinc-700 hover:border-zinc-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/80 disabled:cursor-not-allowed disabled:opacity-50"
             disabled={loading && !stream}
+            className={`flex-1 flex items-center justify-center gap-1.5 rounded-lg px-2.5 sm:px-3 py-2 text-[10px] sm:text-xs font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/80 disabled:cursor-not-allowed disabled:opacity-50 ${
+              videoActive
+                ? 'border border-green-500/50 bg-green-500/10 text-green-400 hover:bg-green-500/20'
+                : 'border border-zinc-700 bg-zinc-800/50 text-white hover:bg-zinc-700 hover:border-zinc-600'
+            }`}
           >
-            {videoActive ? 'Pause Camera' : 'Enable Camera'}
+            {videoActive ? (
+              <>
+                <Video className="w-3.5 h-3.5" />
+                <span>Camera</span>
+              </>
+            ) : (
+              <>
+                <VideoOff className="w-3.5 h-3.5" />
+                <span>Camera</span>
+              </>
+            )}
           </button>
           <button
             type="button"
             onClick={handleToggleAudio}
-            className="flex-1 rounded-xl border border-zinc-700 bg-zinc-800/50 px-3 py-2.5 text-xs font-semibold uppercase tracking-wide text-white transition-all duration-200 hover:bg-zinc-700 hover:border-zinc-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/80 disabled:cursor-not-allowed disabled:opacity-50"
             disabled={loading && !stream}
+            className={`flex-1 flex items-center justify-center gap-1.5 rounded-lg px-2.5 sm:px-3 py-2 text-[10px] sm:text-xs font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/80 disabled:cursor-not-allowed disabled:opacity-50 ${
+              audioActive
+                ? 'border border-green-500/50 bg-green-500/10 text-green-400 hover:bg-green-500/20'
+                : 'border border-zinc-700 bg-zinc-800/50 text-white hover:bg-zinc-700 hover:border-zinc-600'
+            }`}
           >
-            {audioActive ? 'Mute Mic' : 'Enable Mic'}
+            {audioActive ? (
+              <>
+                <Mic className="w-3.5 h-3.5" />
+                <span>Mic</span>
+              </>
+            ) : (
+              <>
+                <MicOff className="w-3.5 h-3.5" />
+                <span>Mic</span>
+              </>
+            )}
           </button>
         </div>
       </div>

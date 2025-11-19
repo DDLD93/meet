@@ -71,27 +71,27 @@ export function ShareButton({
   }, [url]);
 
   return (
-    <div className="flex items-center gap-1.5">
+    <div className="flex items-center gap-1">
       <Button
         onClick={handleShare}
         variant={variant}
         size={size}
-        className={`group transition-all ${className}`}
+        className={`group h-8 w-8 p-0 transition-all hover:bg-white/10 ${className}`}
+        title="Share meeting"
       >
-        <Share2 className="h-4 w-4 transition-transform group-hover:scale-110 group-hover:rotate-12" />
-        <span className="hidden sm:inline">Share</span>
+        <Share2 className="h-3.5 w-3.5 transition-transform group-hover:scale-110 group-hover:rotate-12" />
       </Button>
       <Button
         onClick={handleCopy}
         variant="ghost"
         size={size}
-        className={`h-9 w-9 p-0 transition-all hover:bg-white/10 ${className}`}
+        className={`h-8 w-8 p-0 transition-all hover:bg-white/10 ${className}`}
         title={copied ? 'Copied!' : 'Copy link'}
       >
         {copied ? (
-          <Check className="h-4 w-4 text-green-400 animate-in fade-in duration-200" />
+          <Check className="h-3.5 w-3.5 text-green-400 animate-in fade-in duration-200" />
         ) : (
-          <Copy className="h-4 w-4 transition-transform hover:scale-110" />
+          <Copy className="h-3.5 w-3.5 transition-transform hover:scale-110" />
         )}
       </Button>
     </div>
