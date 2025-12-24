@@ -27,6 +27,8 @@ import { useRouter } from 'next/navigation';
 import { useSetupE2EE } from '@/lib/useSetupE2EE';
 import { useLowCPUOptimizer } from '@/lib/usePerfomanceOptimiser';
 import { ParticipantList } from './ParticipantList';
+import { ShareButton } from './ShareButton';
+import { loadStoredCredentials } from '@/lib/meetingSession';
 import { Users } from 'lucide-react';
 
 const SHOW_SETTINGS_MENU = process.env.NEXT_PUBLIC_SHOW_SETTINGS_MENU == 'true';
@@ -60,6 +62,7 @@ export function MeetingRoom({
         options={{ codec, hq }}
         roomName={roomName}
         meetingTitle={meetingTitle}
+        meetingId={meetingId}
       />
     </main>
   );
@@ -74,6 +77,7 @@ function VideoConferenceComponent(props: {
   };
   roomName?: string | null;
   meetingTitle?: string | null;
+  meetingId: string;
 }) {
   const keyProvider = new ExternalE2EEKeyProvider();
   const { worker, e2eePassphrase } = useSetupE2EE();
@@ -138,7 +142,27 @@ function VideoConferenceComponent(props: {
   }, []);
 
   const router = useRouter();
-  const handleOnLeave = React.useCallback(() => router.push('/'), [router]);
+  const handleOnLeave = React.useCallback(() => {
+    // Load credentials for rejoining
+    const credentials = loadStoredCredentials(props.meetingId);
+    if (credentials?.roomName) {
+      const params = new URLSearchParams();
+      if (credentials.email) {
+        params.set('email', credentials.email);
+      }
+      if (credentials.name) {
+        params.set('name', credentials.name);
+      }
+      const query = params.toString();
+      router.push(`/join/${encodeURIComponent(credentials.roomName)}${query ? `?${query}` : ''}`);
+    } else if (props.roomName) {
+      // Fallback to join page without credentials
+      router.push(`/join/${encodeURIComponent(props.roomName)}`);
+    } else {
+      // Last resort: go to home
+      router.push('/');
+    }
+  }, [router, props.meetingId, props.roomName]);
   const handleError = React.useCallback((error: Error) => {
     console.error(error);
     alert(`Encountered an unexpected error, check the console logs for details: ${error.message}`);
@@ -186,6 +210,14 @@ function VideoConferenceComponent(props: {
 
   const [showParticipants, setShowParticipants] = React.useState(false);
 
+  // Generate meeting URL for sharing
+  const shareUrl = React.useMemo(() => {
+    if (typeof window === 'undefined' || !props.roomName) {
+      return '';
+    }
+    return `${window.location.origin}/join/${encodeURIComponent(props.roomName)}`;
+  }, [props.roomName]);
+
   return (
     <div className="lk-room-container relative h-full w-full bg-[var(--color-background)]">
       <RoomContext.Provider value={room}>
@@ -204,17 +236,31 @@ function VideoConferenceComponent(props: {
           )}
         </div>
         {!showParticipants && (
-          <button
-            onClick={() => setShowParticipants(true)}
-            className="fixed top-16 sm:top-20 right-2 sm:right-3 z-[1000] flex items-center gap-1.5 rounded-lg border border-zinc-800/50 bg-zinc-900/90 backdrop-blur-sm px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-white shadow-lg hover:bg-zinc-800/50 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/80"
-            aria-label="Show participants"
-          >
-            <Users className="w-4 h-4" />
-            <span className="inline-flex items-center justify-center min-w-[18px] h-4 px-1.5 rounded-full text-[10px] font-semibold bg-red-500/20 text-red-400 border border-red-500/30">
-              {room.remoteParticipants.size + 1}
-            </span>
-            <span className="hidden sm:inline">Participants</span>
-          </button>
+          <div className="fixed top-16 sm:top-20 right-2 sm:right-3 z-[1000] flex items-center gap-2">
+            {shareUrl && (
+              <div className="flex items-center">
+                <ShareButton
+                  url={shareUrl}
+                  title={props.meetingTitle || 'Meeting'}
+                  text={`Join me in ${props.meetingTitle || 'this meeting'}`}
+                  size="sm"
+                  variant="ghost"
+                  className="text-white hover:text-red-400"
+                />
+              </div>
+            )}
+            <button
+              onClick={() => setShowParticipants(true)}
+              className="flex items-center gap-1.5 rounded-lg border border-zinc-800/50 bg-zinc-900/90 backdrop-blur-sm px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-white shadow-lg hover:bg-zinc-800/50 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/80"
+              aria-label="Show participants"
+            >
+              <Users className="w-4 h-4" />
+              <span className="inline-flex items-center justify-center min-w-[18px] h-4 px-1.5 rounded-full text-[10px] font-semibold bg-red-500/20 text-red-400 border border-red-500/30">
+                {room.remoteParticipants.size + 1}
+              </span>
+              <span className="hidden sm:inline">Participants</span>
+            </button>
+          </div>
         )}
         <DebugMode />
         <RecordingIndicator />

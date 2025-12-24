@@ -73,6 +73,8 @@ export const generateRoomName = async (checkUnique?: (name: string) => Promise<b
   return generateRandomRoomName();
 };
 
+const DEFAULT_PASSWORD_LENGTH = 12;
+
 export const generateMeetingPassword = (length = DEFAULT_PASSWORD_LENGTH) => {
   const chars = crypto.randomBytes(length * 2).toString('base64url');
   return chars.slice(0, length);
@@ -114,6 +116,21 @@ export const participantsSchema = z
     });
   });
 
+export const participantEmailsSchema = z
+  .array(z.string().email())
+  .transform((emails) => {
+    const seen = new Set<string>();
+    return emails
+      .map((email) => normalizeEmail(email))
+      .filter((email) => {
+        if (seen.has(email)) {
+          return false;
+        }
+        seen.add(email);
+        return true;
+      });
+  });
+
 export const buildParticipantCreateData = (
   participants: Array<{ email: string; name: string }>,
 ) =>
@@ -130,4 +147,54 @@ export const createInstantMeetingSchema = z.object({
 export type CreateInstantMeetingInput = z.infer<
   typeof createInstantMeetingSchema
 >;
+
+/**
+ * Serialize meeting for API responses
+ */
+export const serializeMeeting = (meeting: {
+  id: string;
+  title: string;
+  status: string;
+  roomName: string;
+  createdAt: Date;
+  updatedAt?: Date;
+  participants?: Array<{ email: string; name: string }>;
+}) => ({
+  id: meeting.id,
+  title: meeting.title,
+  status: meeting.status,
+  roomName: meeting.roomName,
+  createdAt: meeting.createdAt.toISOString(),
+  updatedAt: meeting.updatedAt?.toISOString() ?? meeting.createdAt.toISOString(),
+  participants: meeting.participants?.map((p) => ({
+    email: p.email,
+    name: p.name,
+  })) ?? [],
+});
+
+/**
+ * Serialize meeting with additional details for external API
+ */
+export const serializeMeetingDetails = (
+  meeting: {
+    id: string;
+    title: string;
+    status: string;
+    roomName: string;
+    createdAt: Date;
+    updatedAt: Date;
+    participants: Array<{ email: string; name: string }>;
+  },
+  options?: {
+    baseUrl?: string | null;
+    messageCount?: number;
+  },
+) => {
+  const baseUrl = options?.baseUrl ?? getAppBaseUrl();
+  return {
+    ...serializeMeeting(meeting),
+    joinUrl: buildJoinUrl(meeting.roomName, { baseUrl }),
+    messageCount: options?.messageCount ?? 0,
+  };
+};
 
